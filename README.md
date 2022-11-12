@@ -1,8 +1,8 @@
 # cs225-final-project-set
 
-## Leading Question 
+## Leading Question  
 
-####As in the popular webgame [Wikiracer](https://www.thewikigame.com/group), can we find the shortest way to get from one Wikipedia article just by links to other articles?
+As in the popular webgame [Wikiracer](https://www.thewikigame.com/group), can we find the shortest way to get from one Wikipedia article just by links to other articles?
 
 ## Dataset Acquisition
 
