@@ -1,6 +1,6 @@
 #include "utilities.hpp"
 
-std::string Howdy(const std::string& name) {
-  std::string howdy_name = "Howdy, " + name + "!";
-  return howdy_name;
+// TODO: DecodeURL()
+std::string DecodeURL(const std::string& urL_str) {
+  return urL_str;
 }

@@ -1,4 +1,5 @@
 #include "wikigraph.hpp"
+#include "utilities.hpp"
 
 // ------- Rule of Threes ---------
 // TODO: Constructor
