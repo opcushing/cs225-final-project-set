@@ -3,12 +3,6 @@
 #include <unordered_map>
 #include <fstream>
 
-// ------- Rule of Threes ---------
-// TODO: Constructor
-WikiGraph::WikiGraph() {
-
-}
-
 // TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
@@ -39,18 +33,6 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 
     article_map[src].push_back(dest);
   }
-}
-
-// TODO: Destructor
-WikiGraph::~WikiGraph() {
-
-}
-
-// TODO: Copy Assignment Operator
-WikiGraph& WikiGraph::operator=(WikiGraph& other) {
-  // ??
-  (void) other;
-  return *this;
 }
 
 
