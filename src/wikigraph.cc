@@ -74,21 +74,6 @@ std::vector<std::string> WikiGraph::getPathBFS(const std::string& from_page, con
 
 // TODO: getPathDijkstras()
 std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& from_page, const std::string& to_page) const {
-  std::vector<std::string> path_to_return;
-  /* foreach Vertex v in G:
-	d[v] = inf // cost to get to vertex
-	p[v] = null // immediate predecsessor
-  d[s] = 0
-  PriorityQueue q // priority is min distance defined in d
-  q.buildheap(G.vertices())
-
-  repeat until q empty:
-	Vertex u = q.pop()
-	foreach vertex v in neighbors of u:
-		if cost(u,v) + d[u] < d[v]:
-			d[v] = cost(u,v) + d[u]
-			p[v] = u
-  */
 
 // extract keys from map
 std::vector<std::string> pages;
@@ -97,6 +82,7 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
         return kv.first;
     });
 
+ // init distance and predecessor
  std::map<std::string, int> distance;
  std::map<std::string, std::string> predecessor;
  for (const auto& page: pages) {
@@ -114,7 +100,7 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
  std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority};
  q.push(from_page);
 
-  // go through the queue
+  // go through the edges
   while (!q.empty()) {
     std::string curr = q.top();
     q.pop();
