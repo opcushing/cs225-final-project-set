@@ -44,7 +44,8 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 // TODO: getPathBFS()
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
-  std::cout << "getPath" << std::endl;
+  std::cout << "Finding BFS Path from [" << start_page << "] to [" <<
+    end_page << "]" << std::endl;
 
   std::vector<std::string> page_path;
 
@@ -56,15 +57,20 @@ std::vector<std::string> WikiGraph::getPathBFS(
 
   while (!to_visit.empty() && curr_page != end_page) {
     curr_page = to_visit.front();
+    // std::cout << "curr_page: " << curr_page << std::endl;
     to_visit.pop();
     if (article_map.find(curr_page) != article_map.end()) {
+      // std::cout << "AH" << std::endl;
       std::vector<std::string> adjacent_pages = article_map.at(curr_page);
       for (const auto& adj_page : adjacent_pages) {
-        if (page_tree.count(adj_page) != 1) {  // if page hasn't been visited.
+        // if page hasn't been visited.
+        if (page_tree.count(adj_page) != 1) {
           to_visit.push(adj_page);
           page_tree[adj_page] = curr_page;
         }
-        if (adj_page == end_page) break;  // path to page was found.
+        if (adj_page == end_page) {
+          break;  // path to page was found.
+        }
       }
     }
   }
@@ -75,11 +81,13 @@ std::vector<std::string> WikiGraph::getPathBFS(
     return page_path;
   }
 
+  std::cout << "Constructing Path..." << std::endl;
+
   std::string temp_page = end_page;
   std::vector<std::string> reverse_path;
   while (temp_page != start_page) {
     reverse_path.push_back(temp_page);
-    temp_page = page_tree[end_page];
+    temp_page = page_tree.at(temp_page);
   }
   reverse_path.push_back(start_page);
 
