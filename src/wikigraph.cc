@@ -109,10 +109,6 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
     [](decltype(article_map)::value_type const &kv) {
         return kv.first;
     });
-for (const auto & p: pages) {
-  std::cout << p << " ";
-}
-std::cout << std::endl;
 
  // construct the priority queue based on the pages (keys in article_map)
  std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority, pages};
@@ -120,13 +116,16 @@ std::cout << std::endl;
   // go through the queue
   while (!q.empty()) {
     std::string curr = q.top();
-    std::cout << curr << std::endl;
     q.pop();
     for (const auto& neighbor : article_map.at(curr)) {
+      std::cout << "looking at edge " << curr << " -> " << neighbor << std::endl;
       if (1 + distance[curr] < distance[neighbor]) {
+        std::cout << "replacing best path " << curr << " to " << neighbor << std::endl;
+        std::cout << "old distance: " << distance[neighbor] << ", new: " << 1 + distance[curr] << std::endl;
         distance[neighbor] = 1 + distance[curr];
         predecessor[neighbor] = curr;
       }
+      std::cout << std::endl;
     }
   }
 
@@ -134,7 +133,7 @@ std::cout << std::endl;
   std::vector<std::string> path;
   path.push_back(to_page);
 
-  while (predecessor[path.back()] != "") {
+  while (path.back() != from_page && predecessor[path.back()] != "") {
     path.push_back(predecessor[path.back()]);
   }
   // return the reversed version (start -> end)

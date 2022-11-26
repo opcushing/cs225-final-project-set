@@ -27,18 +27,21 @@ TEST_CASE("Intake test", "constructor") {
 }
 
 TEST_CASE("Dijkstras simple", "dijkstras") {
-  std::vector<std::string> expected = {
+  std::vector<std::string> expectedAE = {
     "A", "B", "C", "D", "E"
   };
-  std::cout << "elems:" << std::endl;
+  std::vector<std::string> expectedCD = {
+    "C", "D"
+  };
   WikiGraph w("./datasets/line_graph.tsv");
-  for (const auto& v : w.getPathDijkstras("A", "E")) {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
-  REQUIRE(expected == w.getPathDijkstras("A", "E"));
+  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
+  REQUIRE(expectedCD == w.getPathDijkstras("C", "D"));
 }
 
-TEST_CASE("Dijkstra's picks the bests path", "dijkstras") {
-
+TEST_CASE("Dijkstra's picks the best path", "dijkstras") {
+  std::vector<std::string> expected = {
+    "A", "E"
+  };
+  WikiGraph w("./datasets/diff_paths.tsv");
+  REQUIRE(expected == w.getPathDijkstras("A", "E"));
 }
