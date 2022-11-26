@@ -13,6 +13,7 @@ class WikiGraph {
       double rank = -1.0;
     };
 
+    WikiGraph() = delete; // require that data be entered into the graph
     WikiGraph(const std::string& file_name); // construct from file
 
     std::vector<std::string> getPathBFS(const std::string& from_page, const std::string& to_page) const;
