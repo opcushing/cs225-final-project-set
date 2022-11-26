@@ -1,7 +1,10 @@
 #include "wikigraph.hpp"
-#include "utilities.hpp"
-#include <unordered_map>
+
 #include <fstream>
+#include <queue>
+#include <unordered_map>
+
+#include "utilities.hpp"
 
 // TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
@@ -9,13 +12,15 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   // Populates map.
 
   // open file
-  // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
+  // get a line; decode the first item, decode the second item, add the second
+  // to adjlist of firsts
   std::string file = file_to_string(file_name);
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
-  lines.pop_back(); // our dataset has a line of empty space that we can discard
+  lines
+      .pop_back();  // our dataset has a line of empty space that we can discard
 
-  std::unordered_map<std::string, std::string> decoded; // memoize decoding
+  std::unordered_map<std::string, std::string> decoded;  // memoize decoding
   for (auto& line : lines) {
     std::vector<std::string> pages;
     SplitString(line, '\t', pages);
@@ -35,24 +40,63 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   }
 }
 
-
 // --------- Algorithms ------------
 // TODO: getPathBFS()
-std::vector<std::string> WikiGraph::getPathBFS(const std::string& from_page, const std::string& to_page) const {
-  std::vector<std::string> path_to_return;
-  // ...
-  (void) from_page;
-  (void) to_page;
+std::vector<std::string> WikiGraph::getPathBFS(
+    const std::string& start_page, const std::string& end_page) const {
+  std::cout << "getPath" << std::endl;
 
-  return path_to_return;
+  std::vector<std::string> page_path;
+
+  std::map<std::string, std::string> page_tree;
+  std::queue<std::string> to_visit;
+
+  std::string curr_page;
+  to_visit.push(start_page);
+
+  while (!to_visit.empty() && curr_page != end_page) {
+    curr_page = to_visit.front();
+    to_visit.pop();
+    if (article_map.find(curr_page) != article_map.end()) {
+      std::vector<std::string> adjacent_pages = article_map.at(curr_page);
+      for (const auto& adj_page : adjacent_pages) {
+        if (page_tree.count(adj_page) != 1) {  // if page hasn't been visited.
+          to_visit.push(adj_page);
+          page_tree[adj_page] = curr_page;
+        }
+        if (adj_page == end_page) break;  // path to page was found.
+      }
+    }
+  }
+
+  // Path between pages was not found...
+  if (page_tree.count(end_page) == 0) {
+    std::cout << "NO PATH FOUND" << std::endl;
+    return page_path;
+  }
+
+  std::string temp_page = end_page;
+  std::vector<std::string> reverse_path;
+  while (temp_page != start_page) {
+    reverse_path.push_back(temp_page);
+    temp_page = page_tree[end_page];
+  }
+  reverse_path.push_back(start_page);
+
+  for (int i = (int)reverse_path.size() - 1; i >= 0; --i) {
+    page_path.push_back(reverse_path[i]);
+  }
+
+  return page_path;
 }
 
 // TODO: getPathDijkstras()
-std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& from_page, const std::string& to_page) const {
+std::vector<std::string> WikiGraph::getPathDijkstras(
+    const std::string& start_page, const std::string& end_page) const {
   std::vector<std::string> path_to_return;
   // ...
-  (void) from_page;
-  (void) to_page;
+  (void)start_page;
+  (void)end_page;
 
   return path_to_return;
 }

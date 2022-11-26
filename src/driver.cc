@@ -21,5 +21,11 @@ int main(int argc, char* argv[]) {
   */
   WikiGraph w{"./dataset/links.tsv"};
 
+  std::vector<std::string> page_path = w.getPathBFS("11th_century", "8th_century");
+
+  for (const auto& page : page_path) {
+    std::cout << page << std::endl;
+  }
+
   return 0;
 }
