@@ -39,9 +39,13 @@ TEST_CASE("Dijkstras simple", "dijkstras") {
 }
 
 TEST_CASE("Dijkstra's picks the best path", "dijkstras") {
-  std::vector<std::string> expected = {
+  std::vector<std::string> expectedAE = {
     "A", "E"
   };
+  std::vector<std::string> expectedAD = {
+    "A", "B", "D"
+  };
   WikiGraph w("./datasets/diff_paths.tsv");
-  REQUIRE(expected == w.getPathDijkstras("A", "E"));
+  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
+  REQUIRE(expectedAD == w.getPathDijkstras("A", "D"));
 }

@@ -90,19 +90,6 @@ std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& from_pag
 			p[v] = u
   */
 
- std::map<std::string, int> distance;
- std::map<std::string, std::string> predecessor;
- for (const auto& page: article_map) {
-  distance[page.first] = INT_MAX;
-  predecessor[page.first] = "";
- }
- distance[from_page] = 0;
-
- // priority is minimum distance, represented by this lambda expression
- auto priority = [&distance](std::string a, std::string b) {
-    return distance.at(a) < distance.at(b);
-  };
-
 // extract keys from map
 std::vector<std::string> pages;
 std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
@@ -110,22 +97,33 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
         return kv.first;
     });
 
+ std::map<std::string, int> distance;
+ std::map<std::string, std::string> predecessor;
+ for (const auto& page: pages) {
+  distance[page] = INT_MAX;
+  predecessor[page] = "";
+ }
+ distance[from_page] = 0;
+
+ // priority is minimum distance, represented by this lambda expression
+ auto priority = [&distance](std::string a, std::string b) {
+    return distance.at(a) > distance.at(b);
+  };
+
  // construct the priority queue based on the pages (keys in article_map)
- std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority, pages};
+ std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority};
+ q.push(from_page);
 
   // go through the queue
   while (!q.empty()) {
     std::string curr = q.top();
     q.pop();
     for (const auto& neighbor : article_map.at(curr)) {
-      std::cout << "looking at edge " << curr << " -> " << neighbor << std::endl;
       if (1 + distance[curr] < distance[neighbor]) {
-        std::cout << "replacing best path " << curr << " to " << neighbor << std::endl;
-        std::cout << "old distance: " << distance[neighbor] << ", new: " << 1 + distance[curr] << std::endl;
         distance[neighbor] = 1 + distance[curr];
         predecessor[neighbor] = curr;
+        q.push(neighbor);
       }
-      std::cout << std::endl;
     }
   }
 
