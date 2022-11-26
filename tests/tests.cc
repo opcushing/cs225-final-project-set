@@ -22,7 +22,23 @@ TEST_CASE("Intake test", "constructor") {
     {"\"article\"", {"D"}},
   };
 
-  WikiGraph w("./datasets/test.tsv");
-  std::cout << __LINE__ << std::endl;
+  WikiGraph w("./datasets/input_test.tsv");
   REQUIRE(expected == w.getMap());
+}
+
+TEST_CASE("Dijkstras simple", "dijkstras") {
+  std::vector<std::string> expected = {
+    "A", "B", "C", "D", "E"
+  };
+  std::cout << "elems:" << std::endl;
+  WikiGraph w("./datasets/line_graph.tsv");
+  for (const auto& v : w.getPathDijkstras("A", "E")) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+  REQUIRE(expected == w.getPathDijkstras("A", "E"));
+}
+
+TEST_CASE("Dijkstra's picks the bests path", "dijkstras") {
+
 }
