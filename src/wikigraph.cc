@@ -32,6 +32,10 @@ WikiGraph::WikiGraph(const std::string& file_name) {
     auto dest = decoded[pages[1]];
 
     article_map[src].push_back(dest);
+    if (article_map.find(dest) == article_map.end()) {
+      // create a vertex for the destination (constructs an empty list)
+      article_map[dest];
+    }
   }
 }
 

@@ -15,9 +15,11 @@ TEST_CASE("Intake test", "constructor") {
   std::map<std::string, std::vector<std::string>> expected = 
   {
     {"A", {"B", "C"}},
+    {"B", {}},
     {"C", {"D"}},
+    {"D", {}},
     {"this has spaces", {"B"}},
-    {"\"article\"", {"D"}}
+    {"\"article\"", {"D"}},
   };
 
   WikiGraph w("./datasets/test.tsv");
