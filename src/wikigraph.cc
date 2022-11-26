@@ -73,7 +73,7 @@ std::vector<std::string> WikiGraph::getPathBFS(const std::string& from_page, con
 }
 
 // TODO: getPathDijkstras()
-std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& from_page, const std::string& to_page) const {
+std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
 
 // extract keys from map
 std::vector<std::string> pages;
@@ -89,7 +89,7 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
   distance[page] = INT_MAX;
   predecessor[page] = "";
  }
- distance[from_page] = 0;
+ distance[start_page] = 0;
 
  // priority is minimum distance, represented by this lambda expression
  auto priority = [&distance](std::string a, std::string b) {
@@ -98,7 +98,7 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
 
  // construct the priority queue based on the pages (keys in article_map)
  std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority};
- q.push(from_page);
+ q.push(start_page);
 
   // go through the edges
   while (!q.empty()) {
@@ -115,11 +115,17 @@ std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages)
 
   // construct the path using the predecessor map
   std::vector<std::string> path;
-  path.push_back(to_page);
+  path.push_back(end_page);
 
-  while (path.back() != from_page && predecessor[path.back()] != "") {
+  while (path.back() != start_page && predecessor[path.back()] != "") {
     path.push_back(predecessor[path.back()]);
   }
+
+  // there is no path from the start to the end
+  if (std::find(path.begin(), path.end(), start_page) == path.end()) {
+    throw std::invalid_argument("There is no path between these articles");
+  }
+  
   // return the reversed version (start -> end)
   return {path.rbegin(), path.rend()};
 }
