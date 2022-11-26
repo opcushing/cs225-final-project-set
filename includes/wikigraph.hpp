@@ -4,6 +4,8 @@
 #include <vector>
 #include <map>
 
+typedef std::map<std::string, std::vector<std::string>> Graph;
+
 class WikiGraph {
   public:
     struct RankedPage {
@@ -11,17 +13,15 @@ class WikiGraph {
       double rank = -1.0;
     };
 
-    WikiGraph();
+    WikiGraph() = delete; // require that data be entered into the graph
     WikiGraph(const std::string& file_name); // construct from file
-    ~WikiGraph();
-    WikiGraph& operator=(WikiGraph& other); // could possibly have this as deleted.
 
     std::vector<std::string> getPathBFS(const std::string& from_page, const std::string& to_page) const;
     std::vector<std::string> getPathDijkstras(const std::string& from_page, const std::string& to_page) const;
     std::vector<RankedPage> rankPages() const;
-    std::map<std::string, std::vector<std::string>> getMap() { return article_map; } // for tests
+    Graph getMap() { return article_map; } // for tests
   private:
     std::vector<std::string> getAdjacentArticles(const std::string& from_page) const;
 
-    std::map<std::string, std::vector<std::string>> article_map;
+    Graph article_map;
 };
