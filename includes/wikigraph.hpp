@@ -19,6 +19,7 @@ class WikiGraph {
     std::vector<std::string> getPathBFS(const std::string& from_page, const std::string& to_page) const;
     std::vector<std::string> getPathDijkstras(const std::string& from_page, const std::string& to_page) const;
     std::vector<RankedPage> rankPages() const;
+    std::map<std::string, std::vector<std::string>> getMap() { return article_map; } // for tests
   private:
     std::vector<std::string> getAdjacentArticles(const std::string& from_page) const;
 

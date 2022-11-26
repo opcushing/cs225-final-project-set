@@ -15,8 +15,7 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   // Populates map.
 
   // open file
-  // get a line; decode the first item, decode the second item, add the second to adjlist of first
-  
+  // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
   std::string file = file_to_string(file_name);
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
