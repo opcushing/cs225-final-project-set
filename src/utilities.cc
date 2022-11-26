@@ -3,12 +3,25 @@
 #include <fenv.h>
 #include <signal.h>
 #include <vector>
+#include <sstream>
 
 
 // TODO: DecodeURL()
 std::string DecodeURL(const std::string& url_str) {
-  
-  return url_str;
+  std::stringstream out;
+  for (size_t i = 0; i < url_str.size(); ++i) {
+    if (url_str[i] == '%') { // handle special character
+      // dense code: takes the next two characters, converts to a base 16 int, 
+      // then converts to a char, then stores in out
+      out << (char)(std::stoi(url_str.substr(i+1, 2), nullptr, 16));
+      i += 2; // skip the next two characters
+    } else if (url_str[i] == '_') { // handle space
+      out << " ";
+    } else {
+      out << url_str[i];
+    }
+  }
+  return out.str();
 }
 
 // All code below taken from CS225 mp_schedule utils.cc
