@@ -19,7 +19,14 @@ int main(int argc, char* argv[]) {
    * Call BFS search on it from the given input
    *  - Maybe -f [from_page] -t [to_page]
   */
-  WikiGraph w{"./dataset/links.tsv"};
+  WikiGraph w{"./datasets/links.tsv"};
+
+  std::vector<std::string> page_path = w.getPathBFS("Advertising", "Silicon");
+
+  for (const auto& page : page_path) {
+    std::cout << page << " -> ";
+  }
+  std::cout << "[Finished]" << std::endl;
 
   return 0;
 }

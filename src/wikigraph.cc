@@ -1,8 +1,10 @@
 #include "wikigraph.hpp"
-#include "utilities.hpp"
-#include <unordered_map>
+
 #include <fstream>
 #include <queue>
+#include <unordered_map>
+
+#include "utilities.hpp"
 
 // TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
@@ -42,16 +44,50 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   }
 }
 
-
 // --------- Algorithms ------------
 // TODO: getPathBFS()
-std::vector<std::string> WikiGraph::getPathBFS(const std::string& from_page, const std::string& to_page) const {
-  std::vector<std::string> path_to_return;
-  // ...
-  (void) from_page;
-  (void) to_page;
+std::vector<std::string> WikiGraph::getPathBFS(
+    const std::string& start_page, const std::string& end_page) const {
 
-  return path_to_return;
+  std::vector<std::string> page_path;
+
+  std::map<std::string, std::string> page_tree;
+  std::queue<std::string> to_visit;
+
+  std::string curr_page;
+  to_visit.push(start_page);
+
+  while (!to_visit.empty() && curr_page != end_page) {
+    curr_page = to_visit.front();
+    to_visit.pop();
+    if (article_map.find(curr_page) != article_map.end()) {
+      std::vector<std::string> adjacent_pages = article_map.at(curr_page);
+      for (const auto& adj_page : adjacent_pages) {
+        // if page hasn't been visited.
+        if (page_tree.count(adj_page) != 1) {
+          to_visit.push(adj_page);
+          page_tree[adj_page] = curr_page;
+        }
+        if (adj_page == end_page) {
+          break; // path to page was found.
+        }
+      }
+    }
+  }
+
+  // Path between pages was not found...
+  if (page_tree.count(end_page) == 0) {
+    throw std::runtime_error("Path to page not found");
+  }
+
+  std::string path_page = end_page;
+  while (path_page != start_page) {
+    page_path.push_back(path_page);
+    path_page = page_tree.at(path_page);
+  }
+  page_path.push_back(start_page);
+
+  return {page_path.rbegin(), page_path.rend()};
 }
 
 // TODO: getPathDijkstras()
