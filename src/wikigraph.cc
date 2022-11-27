@@ -16,7 +16,9 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   std::string file = file_to_string(file_name);
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
-  lines.pop_back(); // our dataset has a line of empty space that we can discard
+  // our dataset has a line of empty space that we can discard
+  if (lines.back().empty())
+    lines.pop_back(); 
 
   std::unordered_map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
@@ -35,6 +37,10 @@ WikiGraph::WikiGraph(const std::string& file_name) {
     auto dest = decoded[pages[1]];
 
     article_map[src].push_back(dest);
+    if (article_map.find(dest) == article_map.end()) {
+      // create a vertex for the destination (constructs an empty list)
+      article_map[dest];
+    }
   }
 }
 
@@ -90,14 +96,61 @@ std::vector<std::string> WikiGraph::getPathBFS(
 }
 
 // TODO: getPathDijkstras()
-std::vector<std::string> WikiGraph::getPathDijkstras(
-    const std::string& from_page, const std::string& to_page) const {
-  std::vector<std::string> path_to_return;
-  // ...
-  (void) from_page;
-  (void) to_page;
+std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
 
-  return path_to_return;
+// extract keys from map
+std::vector<std::string> pages;
+std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
+    [](decltype(article_map)::value_type const &kv) {
+        return kv.first;
+    });
+
+ // init distance and predecessor
+ std::map<std::string, int> distance;
+ std::map<std::string, std::string> predecessor;
+ for (const auto& page: pages) {
+  distance[page] = INT_MAX;
+  predecessor[page] = "";
+ }
+ distance[start_page] = 0;
+
+ // priority is minimum distance, represented by this lambda expression
+ auto priority = [&distance](std::string a, std::string b) {
+    return distance.at(a) > distance.at(b);
+  };
+
+ // construct the priority queue based on the pages (keys in article_map)
+ std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority};
+ q.push(start_page);
+
+  // go through the edges
+  while (!q.empty()) {
+    std::string curr = q.top();
+    q.pop();
+    for (const auto& neighbor : article_map.at(curr)) {
+      if (1 + distance[curr] < distance[neighbor]) {
+        distance[neighbor] = 1 + distance[curr];
+        predecessor[neighbor] = curr;
+        q.push(neighbor);
+      }
+    }
+  }
+
+  // construct the path using the predecessor map
+  std::vector<std::string> path;
+  path.push_back(end_page);
+
+  while (path.back() != start_page && predecessor[path.back()] != "") {
+    path.push_back(predecessor[path.back()]);
+  }
+
+  // there is no path from the start to the end
+  if (std::find(path.begin(), path.end(), start_page) == path.end()) {
+    throw std::invalid_argument("There is no path between these articles");
+  }
+  
+  // return the reversed version (start -> end)
+  return {path.rbegin(), path.rend()};
 }
 
 // TODO: rankPages()
