@@ -49,6 +49,10 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
 
+  if (!validStartAndEnd(start_page, end_page)) {
+    throw std::invalid_argument("These pages are not in the graph");
+  }
+
   std::vector<std::string> page_path;
 
   std::map<std::string, std::string> page_tree;
@@ -98,12 +102,17 @@ std::vector<std::string> WikiGraph::getPathBFS(
 // TODO: getPathDijkstras()
 std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
 
-// extract keys from map
-std::vector<std::string> pages;
-std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
-    [](decltype(article_map)::value_type const &kv) {
-        return kv.first;
-    });
+  // require start and end exist
+  if (!validStartAndEnd(start_page, end_page)) {
+    throw std::invalid_argument("One or more of these pages are not in the graph");
+  }
+
+  // extract keys from map
+  std::vector<std::string> pages;
+  std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
+      [](decltype(article_map)::value_type const &kv) {
+          return kv.first;
+      });
 
  // init distance and predecessor
  std::map<std::string, int> distance;
@@ -158,4 +167,8 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
   std::vector<RankedPage> ranked_pages;
   // ...
   return ranked_pages;
+}
+
+bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
+  return (article_map.find(start_page) != article_map.end()) && (article_map.find(end_page) != article_map.end());
 }

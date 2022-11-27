@@ -97,3 +97,9 @@ TEST_CASE("BFS handles cycles", "BFS") {
   REQUIRE(expectedAE == w.getPathBFS("A", "E"));
   REQUIRE(expectedAD == w.getPathBFS("A", "D"));
 }
+
+TEST_CASE("BFS matches Dijkstra's given real data", "real") {
+  WikiGraph w("./datasets/links.tsv");
+
+  REQUIRE(w.getPathBFS("12th century", "Walrus") == w.getPathDijkstras("12th century", "Walrus"));
+}
