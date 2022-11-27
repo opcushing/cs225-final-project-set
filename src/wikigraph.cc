@@ -80,19 +80,14 @@ std::vector<std::string> WikiGraph::getPathBFS(
     throw std::runtime_error("Path to page not found");
   }
 
-  std::string temp_page = end_page;
-  std::vector<std::string> reverse_path;
-  while (temp_page != start_page) {
-    reverse_path.push_back(temp_page);
-    temp_page = page_tree.at(temp_page);
+  std::string path_page = end_page;
+  while (path_page != start_page) {
+    page_path.push_back(path_page);
+    path_page = page_tree.at(path_page);
   }
-  reverse_path.push_back(start_page);
+  page_path.push_back(start_page);
 
-  for (int i = (int)reverse_path.size() - 1; i >= 0; --i) {
-    page_path.push_back(reverse_path[i]);
-  }
-
-  return page_path;
+  return {page_path.rbegin(), page_path.rend()};
 }
 
 // TODO: getPathDijkstras()
