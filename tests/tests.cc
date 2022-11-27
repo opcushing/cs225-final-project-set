@@ -50,6 +50,18 @@ TEST_CASE("Dijkstra's picks the best path", "dijkstras") {
   REQUIRE(expectedAD == w.getPathDijkstras("A", "D"));
 }
 
+TEST_CASE("Dijkstra's handles cycles", "BFS") {
+  std::vector<std::string> expectedAE = {
+    "A", "E"
+  };
+  std::vector<std::string> expectedAD = {
+    "A", "B", "D"
+  };
+  WikiGraph w("./datasets/cycle.tsv");
+  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
+  REQUIRE(expectedAD == w.getPathDijkstras("A", "D"));
+}
+
 TEST_CASE("BFS simple", "BFS") {
   std::vector<std::string> expectedAE = {
     "A", "B", "C", "D", "E"
@@ -70,6 +82,18 @@ TEST_CASE("BFS picks the best path", "BFS") {
     "A", "B", "D"
   };
   WikiGraph w("./datasets/diff_paths.tsv");
+  REQUIRE(expectedAE == w.getPathBFS("A", "E"));
+  REQUIRE(expectedAD == w.getPathBFS("A", "D"));
+}
+
+TEST_CASE("BFS handles cycles", "BFS") {
+  std::vector<std::string> expectedAE = {
+    "A", "E"
+  };
+  std::vector<std::string> expectedAD = {
+    "A", "B", "D"
+  };
+  WikiGraph w("./datasets/cycle.tsv");
   REQUIRE(expectedAE == w.getPathBFS("A", "E"));
   REQUIRE(expectedAD == w.getPathBFS("A", "D"));
 }
