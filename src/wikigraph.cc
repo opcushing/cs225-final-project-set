@@ -13,7 +13,9 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   std::string file = file_to_string(file_name);
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
-  lines.pop_back(); // our dataset has a line of empty space that we can discard
+  // our dataset has a line of empty space that we can discard
+  if (lines.back().empty())
+    lines.pop_back(); 
 
   std::unordered_map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
