@@ -16,18 +16,15 @@ public:
   WikiGraph() = delete;  // require that data be entered into the graph
   WikiGraph(const std::string& file_name);  // construct from file
 
-  std::vector<std::string> getPathBFS(const std::string&,
-                                      const std::string&) const;
-  std::vector<std::string> getPathDijkstras(const std::string&,
-                                            const std::string&) const;
+  std::vector<std::string> getPathBFS(const std::string& start_page,
+                                      const std::string& end_page) const;
+  std::vector<std::string> getPathDijkstras(const std::string& start_page,
+                                            const std::string& end_page) const;
   std::vector<RankedPage> rankPages() const;
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
 private:
-  std::vector<std::string> getAdjacentArticles(
-      const std::string&) const;
-
-  bool validStartAndEnd(const std::string&, const std::string&) const;
+  bool validStartAndEnd(const std::string& start, const std::string& end) const;
 
   Graph article_map;
 };
