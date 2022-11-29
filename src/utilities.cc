@@ -16,7 +16,7 @@ std::string DecodeURL(const std::string& url_str) {
       out << (char)(std::stoi(url_str.substr(i+1, 2), nullptr, 16));
       i += 2; // skip the next two characters
     } else if (url_str[i] == '_') { // handle space
-      out << " ";
+      out << (url_str[i+1] == '_' ? ": " : " ");
     } else {
       out << url_str[i];
     }
