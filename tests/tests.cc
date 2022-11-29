@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <wikigraph.hpp>
+#include <time.h>
 
 #include "utilities.hpp"
 
@@ -98,8 +99,41 @@ TEST_CASE("BFS handles cycles", "BFS") {
   REQUIRE(expectedAD == w.getPathBFS("A", "D"));
 }
 
-TEST_CASE("BFS matches Dijkstra's given real data", "real") {
+TEST_CASE("BFS matches Dijkstra's given random real data", "real") {
   WikiGraph w("./datasets/links.tsv");
+  srand(time(NULL));
 
-  REQUIRE(w.getPathBFS("12th century", "Walrus") == w.getPathDijkstras("12th century", "Walrus"));
+  auto pages = w.getPages();
+  
+  // perform 5 random searches
+  // make sure both algorithms match each other
+  for (int i = 0; i < 5; ++i) {
+    auto start = pages[rand() % pages.size()];
+    auto end = pages[rand() % pages.size()];
+    std::cout << start << " to " << end;
+
+    
+    std::vector<std::string> bfs_path, dijkstra_path;
+
+    // if one of them cannot find a path, the other should be the same
+    try {
+      bfs_path = w.getPathBFS(start, end);
+      std::cout << " (" << bfs_path.size() << ")";
+    } catch (std::runtime_error e) {
+      std::cout << " (no path)";
+      REQUIRE_THROWS(w.getPathDijkstras(start, end));
+    }
+
+    try {
+      dijkstra_path = w.getPathDijkstras(start, end);
+    } catch (std::runtime_error e) {
+      REQUIRE_THROWS(w.getPathBFS(start, end));
+    }
+
+    std::cout << std::endl;
+
+    // there may be multiple shortest paths through the data,
+    // but we want to ensure that they are both the shortest
+    REQUIRE(bfs_path.size() == dijkstra_path.size());
+  }
 }

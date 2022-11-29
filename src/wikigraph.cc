@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <queue>
-#include <unordered_map>
 
 #include "utilities.hpp"
 
@@ -20,7 +19,7 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   if (lines.back().empty())
     lines.pop_back(); 
 
-  std::unordered_map<std::string, std::string> decoded; // memoize decoding
+  std::map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
     std::vector<std::string> pages;
     SplitString(line, '\t', pages);
@@ -107,12 +106,7 @@ std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_pa
     throw std::invalid_argument("One or more of these pages are not in the graph");
   }
 
-  // extract keys from map
-  std::vector<std::string> pages;
-  std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
-      [](decltype(article_map)::value_type const &kv) {
-          return kv.first;
-      });
+  auto pages = getPages();
 
  // init distance and predecessor
  std::map<std::string, int> distance;
@@ -155,7 +149,7 @@ std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_pa
 
   // there is no path from the start to the end
   if (std::find(path.begin(), path.end(), start_page) == path.end()) {
-    throw std::invalid_argument("There is no path between these articles");
+    throw std::runtime_error("There is no path between these articles");
   }
   
   // return the reversed version (start -> end)
@@ -171,4 +165,15 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
   return (article_map.find(start_page) != article_map.end()) && (article_map.find(end_page) != article_map.end());
+}
+
+std::vector<std::string> WikiGraph::getPages() const {
+  // extract keys from map
+  std::vector<std::string> pages;
+  std::transform(article_map.begin(), article_map.end(), std::back_inserter(pages),
+      [](decltype(article_map)::value_type const &kv) {
+          return kv.first;
+      });
+
+  return pages;
 }

@@ -21,7 +21,8 @@ public:
   std::vector<std::string> getPathDijkstras(const std::string&,
                                             const std::string&) const;
   std::vector<RankedPage> rankPages() const;
-  Graph getMap() { return article_map; }  // for tests
+  Graph getMap() const { return article_map; }  // for tests
+  std::vector<std::string> getPages() const;
 private:
   std::vector<std::string> getAdjacentArticles(
       const std::string&) const;
