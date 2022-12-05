@@ -44,7 +44,7 @@ Brandes
 - Function output: The function will output the centrality $C$ of the given page $v$, which is defined by the Brandes algorithm to be $C(v)=\sum_{s,t \in V}\frac{S(s,t|v)}{S(s,t)}$, where $S(s,t|v)$ is the number of shortest paths from $s$ to $t$ which pass through $v$ and $S(s,t)$ is the number of shortest paths from $s$ to $t$.
 
 Page Rank
-- Function efficiency: The page rank algorithm runs in $O(V + E)$ time, where E is the number of eges (links in the dataset) and V is the number of vertices (pages in the dataset). The memory needed to perform the algorithm is at least $O(V^2)$, since we need to represent the data as a graph adjacency matrix to perform the neccesary calculations.
+- Function efficiency: The page rank algorithm runs in $O(V + E)$ time, where E is the number of edges (links in the dataset) and V is the number of vertices (pages in the dataset). The memory needed to perform the algorithm is at least $O(V^2)$, since we need to represent the data as a graph adjacency matrix to perform the neccesary calculations.
 - Function input: This function just needs the entire graph data to perform the algorithm.
 - Function output: This function will output the relative strength / popularity of every page, in descending order of popularity. This will likely be a vector of pairs of strings and doubles, the string being the article title, and the double being the article's popularity (0.0 to 1.0).
 
