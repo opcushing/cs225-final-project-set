@@ -2,6 +2,8 @@
 
 #include <fstream>
 #include <queue>
+#include <limits>
+#include <algorithm>
 
 #include "utilities.hpp"
 
@@ -21,6 +23,8 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 
   std::map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
+    // don't process lines with comments
+    if (line[0] == '#') continue;
     std::vector<std::string> pages;
     SplitString(line, '\t', pages);
 
@@ -97,6 +101,8 @@ std::vector<std::string> WikiGraph::getPathBFS(
 /**
  * @deprecated
 */
+// weigh edges by inverse of pagerank (popular edges are cheaper)
+// or brande's algorithm
 std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
 
   // require start and end exist
@@ -110,7 +116,7 @@ std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_pa
  std::map<std::string, int> distance;
  std::map<std::string, std::string> predecessor;
  for (const auto& page: pages) {
-  distance[page] = INT_MAX;
+  distance[page] = std::numeric_limits<int>::max();
   predecessor[page] = "";
  }
  distance[start_page] = 0;
