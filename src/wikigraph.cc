@@ -43,8 +43,8 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   }
 }
 
-// --------- Algorithms ------------
-// TODO: getPathBFS()
+// --------- Algorithms --------------
+// DONE: getPathBFS()
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
 
@@ -93,7 +93,10 @@ std::vector<std::string> WikiGraph::getPathBFS(
   return {page_path.rbegin(), page_path.rend()};
 }
 
-// TODO: getPathDijkstras()
+// DONE: getPathDijkstras()
+/**
+ * @deprecated
+*/
 std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
 
   // require start and end exist
@@ -157,6 +160,53 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
   // ...
   return ranked_pages;
 }
+
+// TODO: getBetweenCentrality()
+double WikiGraph::getBetweenCentrality(const std::string& page) const {
+  // Note: will possibly be memoized, either from this function or the other.
+  std::map<std::string, double> centralityMap = getCentralityMap();
+  if (centralityMap.find(page) != centralityMap.end()) {
+    return centralityMap.at(page);
+  }
+  return -1.0; // INVALID VALUE.
+}
+
+// TODO: getCentralityMap()
+std::map<std::string, double> WikiGraph::getCentralityMap() const {
+  /* PSEUDOCODE as taken from Ulrik Brandes original paper:
+  https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
+  
+  C_B[v] = 0, for v in V
+  for s in V do
+    S: empty stack
+    P[w] = empty list, for w in V
+    sigma[t] = 0, t in V; sigma[s] = 1;
+    d[t] = -1, for t in V; d[s] = 0;
+    Q: empty queue
+    Q enqueue s
+    while Q is not empty:
+      dequeue v from Q;
+      push v on S
+      for adjacent_page w of v:
+        if d[w] < 0 then:
+          enqueue w on Q
+          d[w] = d[v] + 1;
+        if d[w] == d[v] + 1
+          sigma[w] = sigma[w] + sigma[v];
+          P[w] append v
+    delta[v] = 0, for v in V
+    // S return vertices in order of non-increasing distance from s
+    while S is not empty:
+      w = S.pop();
+      for v in P[w]:
+        delta[v] += ( sigma[v] / sigma[w] ) * (1 + delta[w]);
+      if w != s:
+        C_B[w] = C_B[w] + delta[W];
+  */
+  return std::map<std::string, double>(); // Default value for now
+}
+
+//---------- Helper Methods ----------
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
   return (article_map.find(start_page) != article_map.end()) && (article_map.find(end_page) != article_map.end());
