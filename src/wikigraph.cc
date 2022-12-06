@@ -203,7 +203,55 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
       if w != s:
         C_B[w] = C_B[w] + delta[W];
   */
-  return std::map<std::string, double>(); // Default value for now
+
+  std::cout << "------ Producing Centrality Map ------" << std::endl;
+
+  std::vector<std::string> pages = getPages();
+
+  std::map<std::string, double> centralilty_map;
+  for (const auto& page : pages) centralilty_map[page] = 0.0;
+  for (const auto& start : pages) {
+    std::cout << "Current page" << start << std::endl;
+    std::stack<std::string> S;
+    std::map<std::string, std::vector<std::string>> predecessor;
+    for (const auto& page : pages) predecessor[page] = {};
+    std::map<std::string, double> sigma;
+    for (const auto& page : pages) sigma[page] = 0.0;
+    sigma[start] = 1.0;
+    std::map<std::string, int> dist;
+    for (const auto& page : pages) dist[page] = -1;
+    dist[start] = 0;
+    std::queue<std::string> Q;
+    Q.push(start);
+    while(!Q.empty()) {
+      std::string v = Q.front(); Q.pop();
+      S.push(v);
+      for (const auto& w : article_map.at(v)) {
+        if (dist[w] < 0) {
+          Q.push(w);
+          dist[w] = dist[v] + 1;
+        }
+        if (dist[w] == dist[v] + 1) {
+          sigma[w] = sigma[w] + sigma[v];
+          predecessor[w].push_back(v);
+        }
+      }
+    }
+
+    std::map<std::string, double> delta;
+    for (const auto& page : pages) delta[page] = 0.0;
+    while (!S.empty()) {
+      std::string w = S.top(); S.pop();
+      for (const auto& v : predecessor[w]) {
+        delta[v] += ( sigma[v] / sigma[w] ) * (1.0 + delta[w]);
+      }
+      if (w != start) {
+        centralilty_map[w] += delta[w];
+      }
+    }
+  }
+
+  return centralilty_map; // Default value for now
 }
 
 //---------- Helper Methods ----------
