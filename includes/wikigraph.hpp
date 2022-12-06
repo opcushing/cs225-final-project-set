@@ -30,6 +30,14 @@ public:
 
 
   // ------ Helpers ---------
+
+  /**
+   * Write the contents of the centrality map to a file.
+   * @param centrality_map A map of the pages, and their centrality value.
+   * @param file_name Name of the file to write to. (Should end with .tsv)
+  */
+  void centralityMapToFile(const std::map<std::string, double>& centrality_map, const std::string& file_name) const;
+
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
 private:

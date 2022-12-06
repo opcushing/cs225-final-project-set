@@ -21,20 +21,9 @@ int main(int argc, char* argv[]) {
   */
   WikiGraph w{"./datasets/links.tsv"};
 
-  // std::vector<std::string> page_path = w.getPathBFS("Advertising", "Silicon");
-
-  // for (const auto& page : page_path) {
-  //   std::cout << page << " -> ";
-  // }
-  // std::cout << "[Finished]" << std::endl;
-
-  std::cout << "Beep Boop" << std::endl;
-
   auto C_B = w.getCentralityMap();
 
-  for (const auto& pair : C_B) {
-    std::cout << pair.second << std::endl;
-  }
+  w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
 
   return 0;
 }

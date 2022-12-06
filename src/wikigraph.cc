@@ -177,22 +177,25 @@ double WikiGraph::getBetweenCentrality(const std::string& page) const {
   return -1.0; // INVALID VALUE.
 }
 
-// TODO: getCentralityMap()
+// FIXME: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() const {
-  /* PSEUDOCODE as taken from Ulrik Brandes original paper:
-  https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
+  // PSEUDOCODE as taken from Ulrik Brandes original paper:
+  // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
+
+  // TODO: Need to memoize this function!
+  /* Psueudocode:
+    If the centrality_map file exists, open it.
+    Generate the map from the file.
   */
 
-  // std::cout << "------ Producing Centrality Map ------" << std::endl;
-
-  std::ofstream map_file("centrality_map.tsv");
+  std::cout << "------ Producing Centrality Map ------" << std::endl;
 
   std::vector<std::string> pages = getPages();
 
   std::map<std::string, double> centralilty_map;
   for (const auto& page : pages) centralilty_map[page] = 0.0;
   for (const auto& start : pages) {
-    // std::cout << "Current page: " << start << std::endl;
+    std::cout << "Current page: " << start << std::endl;
     std::stack<std::string> S;
     std::map<std::string, std::vector<std::string>> predecessor;
     for (const auto& page : pages) predecessor[page] = {};
@@ -232,10 +235,22 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
     }
   }
 
+  centralityMapToFile(centralilty_map, "./output/centrality_map.tsv");
+
   return centralilty_map; // Default value for now
 }
 
 //---------- Helper Methods ----------
+
+// TODO: centralityMapToFile()
+void WikiGraph::centralityMapToFile(const std::map<std::string, double>& centrality_map, const std::string& file_name) const {
+  std::ofstream map_file(file_name);
+  if (map_file.is_open()) {
+    for (const auto& [page, value] : centrality_map) {
+      map_file << page << "\t" << value << "\n";
+    }
+  }
+}
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
   return (article_map.find(start_page) != article_map.end()) && (article_map.find(end_page) != article_map.end());
