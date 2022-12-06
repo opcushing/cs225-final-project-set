@@ -179,7 +179,7 @@ double WikiGraph::getBetweenCentrality(const std::string& page) const {
 
 // FIXME: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() const {
-  // PSEUDOCODE as taken from Ulrik Brandes original paper:
+  // Adapted from Ulrik Brandes original paper:
   // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
 
   // TODO: Need to memoize this function!
@@ -188,11 +188,26 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
     Generate the map from the file.
   */
 
+  std::map<std::string, double> centralilty_map;
+
+  std::string centrality_str = file_to_string("./centrality/wikigraph_centrality_map.tsv");
+  if (!centrality_str.empty()) {
+    std::vector<std::string> lines;
+    SplitString(centrality_str, '\n', lines);  
+    if (lines.back().empty()) lines.pop_back(); 
+    for (const auto& line : lines) {
+      std::vector<std::string> pair;
+      SplitString(line, '\t', pair);
+      centralilty_map[pair[0]] = std::stod(pair[1]);
+    }
+    return centralilty_map;
+  }
+
+
   std::cout << "------ Producing Centrality Map ------" << std::endl;
 
   std::vector<std::string> pages = getPages();
 
-  std::map<std::string, double> centralilty_map;
   for (const auto& page : pages) centralilty_map[page] = 0.0;
   for (const auto& start : pages) {
     std::cout << "Current page: " << start << std::endl;
@@ -235,7 +250,7 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
     }
   }
 
-  centralityMapToFile(centralilty_map, "./output/centrality_map.tsv");
+  // centralityMapToFile(centralilty_map, "./output/centrality_map.tsv");
 
   return centralilty_map; // Default value for now
 }

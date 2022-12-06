@@ -76,6 +76,7 @@
     "unordered_set": "cpp",
     "condition_variable": "cpp",
     "list": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "filesystem": "cpp"
   }
 }

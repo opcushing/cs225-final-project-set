@@ -23,7 +23,21 @@ int main(int argc, char* argv[]) {
 
   auto C_B = w.getCentralityMap();
 
-  w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
+  // w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
+
+  std::string most_central_page;
+  double max_centrality = 0.0;
+  for (const auto& pair : C_B) {
+    const auto& page = pair.first;
+    const auto& centrality = pair.second;
+    if (centrality > max_centrality) {
+      max_centrality = centrality;
+      most_central_page = page;
+    }
+  }
+
+  std::cout << "The most central page is: " << most_central_page << "\n";
+  std::cout << "with a centrality value of: " << max_centrality << std::endl;
 
   return 0;
 }
