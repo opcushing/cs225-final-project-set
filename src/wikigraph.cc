@@ -175,43 +175,18 @@ double WikiGraph::getBetweenCentrality(const std::string& page) const {
 std::map<std::string, double> WikiGraph::getCentralityMap() const {
   /* PSEUDOCODE as taken from Ulrik Brandes original paper:
   https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
-  
-  C_B[v] = 0, for v in V
-  for s in V do
-    S: empty stack
-    P[w] = empty list, for w in V
-    sigma[t] = 0, t in V; sigma[s] = 1;
-    d[t] = -1, for t in V; d[s] = 0;
-    Q: empty queue
-    Q enqueue s
-    while Q is not empty:
-      dequeue v from Q;
-      push v on S
-      for adjacent_page w of v:
-        if d[w] < 0 then:
-          enqueue w on Q
-          d[w] = d[v] + 1;
-        if d[w] == d[v] + 1
-          sigma[w] = sigma[w] + sigma[v];
-          P[w] append v
-    delta[v] = 0, for v in V
-    // S return vertices in order of non-increasing distance from s
-    while S is not empty:
-      w = S.pop();
-      for v in P[w]:
-        delta[v] += ( sigma[v] / sigma[w] ) * (1 + delta[w]);
-      if w != s:
-        C_B[w] = C_B[w] + delta[W];
   */
 
-  std::cout << "------ Producing Centrality Map ------" << std::endl;
+  // std::cout << "------ Producing Centrality Map ------" << std::endl;
+
+  std::ofstream map_file("centrality_map.tsv");
 
   std::vector<std::string> pages = getPages();
 
   std::map<std::string, double> centralilty_map;
   for (const auto& page : pages) centralilty_map[page] = 0.0;
   for (const auto& start : pages) {
-    std::cout << "Current page" << start << std::endl;
+    // std::cout << "Current page: " << start << std::endl;
     std::stack<std::string> S;
     std::map<std::string, std::vector<std::string>> predecessor;
     for (const auto& page : pages) predecessor[page] = {};
