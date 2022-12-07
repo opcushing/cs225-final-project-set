@@ -1,6 +1,6 @@
 ## Leading Question 
 
-####As in the popular webgame [Wikiracer](https://www.thewikigame.com/group), can we find the shortest way to get from one Wikipedia article just by links to other articles?
+####As in the popular webgame [Wikiracer](https://www.thewikigame.com/group), can we find the shortest way to navigate from one Wikipedia article to another through links to other articles?
 
 ## Dataset Acquisition
 
@@ -39,9 +39,9 @@ BFS
 - Function output: The function will output a vector of strings where the first element is the start, the final element is the destination, and the interior are the titles of the pages used to get from the start to the end.
 
 Brandes
-- Function efficiency: Brandes' algorithm requires doing a BFS for each possible pair of nodes. Because our data is formatted as an adjacency list, doing $V^2$ BFS operations will take $O(V^3)$ time. This is a very slow process, but its output can be reused, so it will be done upon initialization and memoized for later use.
-- Function input: The function will take in the name of a page.
-- Function output: The function will output the centrality $C$ of the given page $v$, which is defined by the Brandes algorithm to be $C(v)=\sum_{s,t \in V}\frac{S(s,t|v)}{S(s,t)}$, where $S(s,t|v)$ is the number of shortest paths from $s$ to $t$ which pass through $v$ and $S(s,t)$ is the number of shortest paths from $s$ to $t$.
+- Function efficiency: Brandes' algorithm calculates the betweenness centrality index for every page. A naive implementation of this process would require a BFS from every node to every other node, taking about $O(V^3)$ time. Brandes' algorithm still requires doing a BFS, but is slightly more clever, using $O(VE + V^2 \times log(E))$. This is a still an extremely slow process w/o the usage of parallel computation, but its output can be reused, so it will be done upon initialization and memoized for later use.
+- Function input: This function just needs the entire graph data to perform the algorithm.
+- Function output: The function will output a map from a given page $v$ to its betweenness centrality index. This index $C(v)$, where $v$ is the given page, is defined as $C(v)=\sum_{s,t \in V}\frac{S(s,t|v)}{S(s,t)}$, where $S(s,t|v)$ is the number of shortest paths from $s$ to $t$ which pass through $v$ and $S(s,t)$ is the number of shortest paths from $s$ to $t$. In essence, it describes the overall importance of a possibly visiting a given node when travelling through a shortest path.
 
 Page Rank
 - Function efficiency: The page rank algorithm runs in $O(V + E)$ time, where E is the number of edges (links in the dataset) and V is the number of vertices (pages in the dataset). The memory needed to perform the algorithm is at least $O(V^2)$, since we need to represent the data as a graph adjacency matrix to perform the neccesary calculations.
