@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <queue>
+#include <stack>
 #include <limits>
 #include <algorithm>
 #include <thread>
