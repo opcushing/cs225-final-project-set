@@ -245,10 +245,10 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
   std::stack<std::string> S;
   std::map<std::string, std::vector<std::string>> predecessor;
   for (const auto& page : pages) predecessor[page] = {};
-  std::map<std::string, double> sigma;
+  std::unordered_map<std::string, double> sigma;
   for (const auto& page : pages) sigma[page] = 0.0;
   sigma[start] = 1.0;
-  std::map<std::string, int> dist;
+  std::unordered_map<std::string, int> dist;
   for (const auto& page : pages) dist[page] = -1;
   dist[start] = 0;
   std::queue<std::string> Q;
@@ -268,7 +268,7 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
     }
   }
 
-  std::map<std::string, double> delta;
+  std::unordered_map<std::string, double> delta;
   for (const auto& page : pages) delta[page] = 0.0;
   while (!S.empty()) {
     std::string w = S.top(); S.pop();
@@ -276,9 +276,11 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
       delta[v] += ( sigma[v] / sigma[w] ) * (1.0 + delta[w]);
     }
     if (w != start) {
-      mtx.lock();
-      centrality_map[w] += delta[w];
-      mtx.unlock();
+      if (delta[w] != 0.0) {
+        mtx.lock();
+        centrality_map[w] += delta[w];
+        mtx.unlock();
+      }
     }
   }
 }
