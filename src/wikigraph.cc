@@ -4,6 +4,7 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <stack>
 
 #include "utilities.hpp"
 

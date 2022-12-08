@@ -1,5 +1,18 @@
-## This file should describe the following:
+# Github organization
+- The majority of our code can be found in `src/wikigraph.cc`.
+- The primary dataset can be found in `datasets/links.tsv`.
+- Tests can be found in the `tests` directory.
+- The final project presentation can be found [here](https://example.com)
+- The results writeup can be found in `results.md`.
 
-- **Github Organization** – You should describe the physical location of all major files and deliverables (code, tests, data, the written report, the presentation video, etc…)
-
-- **Running Instructions** – You should provide full instructions on how to build and run your executable, including how to define the input data and output location for each method. You should also have instructions on how to build and run your test suite, including a general description on what tests you have created. It is in your best interest to make the instructions (and the running of your executables and tests) as simple and straightforward as possible.
+# Running instructions
+1. Compile the progam using `make`.
+2. Run `./bin/exec` with arguments:
+  - (we need a proper driver)
+3. You can run tests by compiling (`make tests`) and running `./bin/tests`. We test the following functionalities:
+  - The constructor can read from a TSV file properly
+  - The BFS can work on a simple example graph
+  - BFS finds the shortest path in a graph with multiple paths
+  - BFS can handle graph cycles
+  - (brandes tests)
+  - (pagerank tests)
