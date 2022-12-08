@@ -91,8 +91,15 @@ public:
    * @param file_name Name of the file to read from. (In .tsv format)
    * @returns A map of the pages, and their centrality value.
   */
-  std::map<std::string, double> WikiGraph::centralityMapFromFile(const std::string& file_name) const;
+  std::map<std::string, double> centralityMapFromFile(const std::string& file_name) const;
 
+  /**
+   * Displays the current progress of the centrality map.
+   * Based off of: https://stackoverflow.com/questions/14539867/how-to-display-a-progress-indicator-in-pure-c-c-cout-printf
+   * @param queue
+   * @param pages
+  */
+  void displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const;
 
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;

@@ -162,6 +162,7 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
 void WikiGraph::threadHelper(SafeQueue& q, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const {
   std::optional<std::string> curr_page = q.pop();
   while (curr_page.has_value()) {
+    displayCentralityProgress(q, pages);
     brandesHelper(curr_page.value(), centrality_map, pages);
     curr_page = q.pop();
   }
@@ -169,7 +170,7 @@ void WikiGraph::threadHelper(SafeQueue& q, std::map<std::string, double>& centra
 
 void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const {
   // One run of the Brandes algorithm for a starting node.
-  std::cout << "Thread starting page: " << start << std::endl;
+  // std::cout << "Thread starting page: " << start << std::endl;
   std::stack<std::string> S;
   std::unordered_map<std::string, std::vector<std::string>> predecessor;
   for (const auto& page : pages) predecessor[page] = {};
@@ -227,7 +228,7 @@ void WikiGraph::centralityMapToFile(const std::map<std::string, double>& central
 
 std::map<std::string, double> WikiGraph::centralityMapFromFile(const std::string& file_name) const {
   std::map<std::string, double> centralilty_map;
-  std::string centrality_str = file_to_string("./centrality/wikigraph_centrality_map.tsv");
+  std::string centrality_str = file_to_string(file_name);
   if (!centrality_str.empty()) {
     std::vector<std::string> lines;
     SplitString(centrality_str, '\n', lines);  
@@ -240,6 +241,17 @@ std::map<std::string, double> WikiGraph::centralityMapFromFile(const std::string
     return centralilty_map;
   }
   return {};
+}
+
+void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const {
+  float pages_to_go = (float)queue.size();
+  float total_pages = (float)pages.size();
+  float pages_complete = total_pages - pages_to_go;
+  float progress = pages_complete  / total_pages;
+  std::cout << "[ Progess: " << pages_complete << "/" << total_pages << " ";
+  std::cout << int(progress * 100.0) << "% ] \r";
+  std::cout.flush();
+  if (progress == 1.0) std::cout << std::endl;
 }
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
