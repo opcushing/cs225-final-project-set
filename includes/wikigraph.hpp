@@ -61,12 +61,11 @@ public:
 
   // ------ Algorithms -------
 
+  // SHORTEST PATH (BFS):
   std::vector<std::string> getPathBFS(const std::string& start_page,
                                       const std::string& end_page) const;
-  std::vector<std::string> getPathDijkstras(const std::string& start_page,
-                                            const std::string& end_page) const;
-  std::vector<RankedPage> rankPages() const;
 
+  // PAGE CENTRALITY (Brandes Algorithm):
   double getBetweenCentrality(const std::string& page) const;
 
   std::map<std::string, double> getCentralityMap() const;
@@ -75,15 +74,25 @@ public:
 
   void brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const;
 
+  // PAGE RANK:
+  std::vector<RankedPage> rankPages() const;
 
   // ------ Helpers ---------
 
   /**
    * Write the contents of the centrality map to a file.
    * @param centrality_map A map of the pages, and their centrality value.
-   * @param file_name Name of the file to write to. (Should end with .tsv)
+   * @param file_name Name of the file to write to. (In .tsv format)
   */
   void centralityMapToFile(const std::map<std::string, double>& centrality_map, const std::string& file_name) const;
+
+  /**
+   * Produces a centrality map from a pre-computed file.
+   * @param file_name Name of the file to read from. (In .tsv format)
+   * @returns A map of the pages, and their centrality value.
+  */
+  std::map<std::string, double> WikiGraph::centralityMapFromFile(const std::string& file_name) const;
+
 
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
