@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "utilities.hpp"
+#include <iomanip>
 
 #include "wikigraph.hpp"
 
@@ -25,19 +26,15 @@ int main(int argc, char* argv[]) {
 
   // w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
 
-  std::string most_central_page;
-  double max_centrality = 0.0;
-  for (const auto& pair : C_B) {
-    const auto& page = pair.first;
-    const auto& centrality = pair.second;
-    if (centrality > max_centrality) {
-      max_centrality = centrality;
-      most_central_page = page;
-    }
-  }
+  auto C_B_sort = w.sortCentralityMap(C_B);
 
-  std::cout << "The most central page is: " << most_central_page << "\n";
-  std::cout << "with a centrality value of: " << max_centrality << std::endl;
+  std::cout << "The top ten most central articles are: " << std::endl;
+  for (size_t i = 0; i < 10; ++i) {
+    auto pair = C_B_sort[i];
+    auto article = pair.first;
+    auto centrality = pair.second;
+    std::cout << article << " : " << std::setprecision(2) << std::fixed << centrality << std::endl;
+  }
 
   return 0;
 }

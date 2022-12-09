@@ -1,6 +1,5 @@
-#include "wikigraph.hpp"
-
 #include <fstream>
+#include <iomanip>
 #include <queue>
 #include <stack>
 #include <limits>
@@ -10,13 +9,15 @@
 
 #include "utilities.hpp"
 
+#include "wikigraph.hpp"
+
 std::mutex mtx;
 
 // TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
   // Populates map.
-
+  std::cout << "-----Generating WikiGraph-----" << std::endl;
   // open file
   // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
   std::string file = file_to_string(file_name);
@@ -102,14 +103,7 @@ std::vector<std::string> WikiGraph::getPathBFS(
   return {page_path.rbegin(), page_path.rend()};
 }
 
-// TODO: rankPages()
-std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
-  std::vector<RankedPage> ranked_pages;
-  // ...
-  return ranked_pages;
-}
-
-// TODO: getBetweenCentrality()
+// TEST: getBetweenCentrality()
 double WikiGraph::getBetweenCentrality(const std::string& page) const {
   // Note: will possibly be memoized, either from this function or the other.
   std::map<std::string, double> centralityMap = getCentralityMap();
@@ -119,7 +113,14 @@ double WikiGraph::getBetweenCentrality(const std::string& page) const {
   return -1.0; // INVALID VALUE.
 }
 
-// FIXME: getCentralityMap()
+// TODO: rankPages()
+std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
+  std::vector<RankedPage> ranked_pages;
+  // ...
+  return ranked_pages;
+}
+
+// DONE: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() const {
   // Adapted from Ulrik Brandes original paper:
   // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
@@ -222,7 +223,7 @@ void WikiGraph::centralityMapToFile(const std::map<std::string, double>& central
   std::ofstream map_file(file_name);
   if (map_file.is_open()) {
     for (const auto& [page, value] : centrality_map) {
-      map_file << page << "\t" << value << "\n";
+      map_file << page << "\t" << std::setprecision(3) << std::fixed << value << "\n";
     }
   }
 }
@@ -253,6 +254,15 @@ void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vec
   std::cout << int(progress * 100.0) << "% ] \r";
   std::cout.flush();
   if (progress == 1.0) std::cout << std::endl;
+}
+
+std::vector<std::pair<std::string, double>> WikiGraph::sortCentralityMap(const std::map<std::string, double>& centrality_map) const {
+  std::vector<std::pair<std::string, double>> vector(centrality_map.begin(), centrality_map.end());
+  std::sort(vector.begin(), vector.end(), 
+  [](const std::pair<std::string, int> &a, const std::pair<std::string, int> &b) {
+    return a.second > b.second;
+  });
+  return vector;
 }
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {

@@ -33,7 +33,7 @@ class SafeQueue {
     std::lock_guard<std::mutex> lock(mutex_);
     return q_.size();
   }
- 
+
   std::optional<std::string> pop() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (q_.empty()) {
@@ -101,6 +101,8 @@ public:
    * @param pages
   */
   void displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const;
+
+  std::vector<std::pair<std::string, double>> sortCentralityMap(const std::map<std::string, double>& centrality_map) const;
 
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
