@@ -104,11 +104,11 @@ std::vector<std::string> WikiGraph::getPathBFS(
 }
 
 // TEST: getBetweenCentrality()
-double WikiGraph::getBetweenCentrality(const std::string& page) const {
+double WikiGraph::getBetweenCentrality(const std::string& page) {
   // Note: will possibly be memoized, either from this function or the other.
-  std::map<std::string, double> centralityMap = getCentralityMap();
-  if (centralityMap.find(page) != centralityMap.end()) {
-    return centralityMap.at(page);
+  if (centrality_map.empty()) getCentralityMap();
+  if (centrality_map.find(page) != centrality_map.end()) {
+    return centrality_map.at(page);
   }
   return -1.0; // INVALID VALUE.
 }
@@ -121,11 +121,11 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
 }
 
 // DONE: getCentralityMap()
-std::map<std::string, double> WikiGraph::getCentralityMap() const {
+std::map<std::string, double> WikiGraph::getCentralityMap() {
   // Adapted from Ulrik Brandes original paper:
   // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
 
-  std::map<std::string, double> centralilty_map;
+  // std::map<std::string, double> centralilty_map;
 
   // POSSIBLE OPTIMIZATION:
   // Try to read the centrality map from a file, and return it if it exists.
@@ -140,7 +140,7 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
   SafeQueue pages_queue;
 
   for (const auto& page : pages) {
-    centralilty_map[page] = 0.0;
+    centrality_map[page] = 0.0;
     pages_queue.push(page);
   }
 
@@ -148,7 +148,7 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
   std::vector<std::thread> threads;
   const size_t THREAD_COUNT = 10;
   for (size_t thread_idx = 0; thread_idx < THREAD_COUNT; ++thread_idx) {
-    threads.push_back(std::thread(&WikiGraph::threadHelper, this, std::ref(pages_queue), std::ref(centralilty_map), pages));
+    threads.push_back(std::thread(&WikiGraph::threadHelper, this, std::ref(pages_queue), std::ref(centrality_map), pages));
   }
 
   // Wait for the threads to finish
@@ -156,9 +156,9 @@ std::map<std::string, double> WikiGraph::getCentralityMap() const {
     thread.join();
   }
 
-  // centralityMapToFile(centralilty_map, "./output/centrality_map.tsv");
+  // centralityMapToFile(centrality_map, "./output/centrality_map.tsv");
 
-  return centralilty_map; 
+  return centrality_map; 
 }
 
 void WikiGraph::threadHelper(SafeQueue& q, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const {

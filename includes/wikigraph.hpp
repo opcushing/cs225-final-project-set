@@ -67,9 +67,9 @@ public:
                                       const std::string& end_page) const;
 
   // PAGE CENTRALITY (Brandes Algorithm):
-  double getBetweenCentrality(const std::string& page) const;
+  double getBetweenCentrality(const std::string& page);
 
-  std::map<std::string, double> getCentralityMap() const;
+  std::map<std::string, double> getCentralityMap();
 
   void threadHelper(SafeQueue& q, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const;
 
@@ -108,6 +108,8 @@ public:
   std::vector<std::string> getPages() const;
 private:
   bool validStartAndEnd(const std::string& start, const std::string& end) const;
+
+  std::map<std::string, double> centrality_map;
 
   Graph article_map;
 };

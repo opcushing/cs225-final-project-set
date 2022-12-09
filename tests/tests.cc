@@ -11,7 +11,7 @@
 
 #include "utilities.hpp"
 
-TEST_CASE("Intake test", "constructor") {
+TEST_CASE("Intake test", "[constructor]") {
   // python >:)
   std::map<std::string, std::vector<std::string>> expected = 
   {
@@ -27,43 +27,9 @@ TEST_CASE("Intake test", "constructor") {
   REQUIRE(expected == w.getMap());
 }
 
-TEST_CASE("Dijkstras simple", "dijkstras") {
-  std::vector<std::string> expectedAE = {
-    "A", "B", "C", "D", "E"
-  };
-  std::vector<std::string> expectedCD = {
-    "C", "D"
-  };
-  WikiGraph w("./datasets/line_graph.tsv");
-  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
-  REQUIRE(expectedCD == w.getPathDijkstras("C", "D"));
-}
+// ------------- BFS Test Cases -------------
 
-TEST_CASE("Dijkstra's picks the best path", "dijkstras") {
-  std::vector<std::string> expectedAE = {
-    "A", "E"
-  };
-  std::vector<std::string> expectedAD = {
-    "A", "B", "D"
-  };
-  WikiGraph w("./datasets/diff_paths.tsv");
-  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
-  REQUIRE(expectedAD == w.getPathDijkstras("A", "D"));
-}
-
-TEST_CASE("Dijkstra's handles cycles", "BFS") {
-  std::vector<std::string> expectedAE = {
-    "A", "E"
-  };
-  std::vector<std::string> expectedAD = {
-    "A", "B", "D"
-  };
-  WikiGraph w("./datasets/cycle.tsv");
-  REQUIRE(expectedAE == w.getPathDijkstras("A", "E"));
-  REQUIRE(expectedAD == w.getPathDijkstras("A", "D"));
-}
-
-TEST_CASE("BFS simple", "BFS") {
+TEST_CASE("BFS simple", "[BFS]") {
   std::vector<std::string> expectedAE = {
     "A", "B", "C", "D", "E"
   };
@@ -87,7 +53,7 @@ TEST_CASE("BFS picks the best path", "BFS") {
   REQUIRE(expectedAD == w.getPathBFS("A", "D"));
 }
 
-TEST_CASE("BFS handles cycles", "BFS") {
+TEST_CASE("BFS handles cycles", "[BFS]") {
   std::vector<std::string> expectedAE = {
     "A", "E"
   };
@@ -99,41 +65,55 @@ TEST_CASE("BFS handles cycles", "BFS") {
   REQUIRE(expectedAD == w.getPathBFS("A", "D"));
 }
 
-TEST_CASE("BFS matches Dijkstra's given random real data", "real") {
-  WikiGraph w("./datasets/links.tsv");
-  srand(time(NULL));
+// ------------- Brandes Test Cases -------------
 
-  auto pages = w.getPages();
-  
-  // perform 5 random searches
-  // make sure both algorithms match each other
-  for (int i = 0; i < 5; ++i) {
-    auto start = pages[rand() % pages.size()];
-    auto end = pages[rand() % pages.size()];
-    std::cout << start << " to " << end;
-
-    
-    std::vector<std::string> bfs_path, dijkstra_path;
-
-    // if one of them cannot find a path, the other should be the same
-    try {
-      bfs_path = w.getPathBFS(start, end);
-      std::cout << " (" << bfs_path.size() << ")";
-    } catch (std::runtime_error e) {
-      std::cout << " (no path)";
-      REQUIRE_THROWS(w.getPathDijkstras(start, end));
-    }
-
-    try {
-      dijkstra_path = w.getPathDijkstras(start, end);
-    } catch (std::runtime_error e) {
-      REQUIRE_THROWS(w.getPathBFS(start, end));
-    }
-
-    std::cout << std::endl;
-
-    // there may be multiple shortest paths through the data,
-    // but we want to ensure that they are both the shortest
-    REQUIRE(bfs_path.size() == dijkstra_path.size());
-  }
+TEST_CASE("Page Centrality for two middle Nodes", "[Brandes]") {
+  /* A -> B
+     |    |
+     v    v
+     C -> D
+  */
+  WikiGraph w{"./datasets/centrality/basic_two_cent_nodes.tsv"};
+  REQUIRE(w.getBetweenCentrality("A") == 0.0);
+  REQUIRE(w.getBetweenCentrality("D") == 0.0);
+  REQUIRE(w.getBetweenCentrality("B") == w.getBetweenCentrality("C"));
+  REQUIRE(w.getBetweenCentrality("B") > 0.0); // isn't the only shortest path!
+  REQUIRE(w.getBetweenCentrality("B") < 1.0); // isn't the only shortest path!
+  REQUIRE(w.getBetweenCentrality("C") > 0.0); // isn't the only shortest path!
+  REQUIRE(w.getBetweenCentrality("C") < 1.0); // isn't the only shortest path!
 }
+
+TEST_CASE("Page centrality no central nodes", "[Brandes]") {
+  WikiGraph w{"./datasets/centrality/no_central_node.tsv"}; 
+  REQUIRE(w.getBetweenCentrality("A") == 0.0);
+  REQUIRE(w.getBetweenCentrality("B") == 0.0);
+  REQUIRE(w.getBetweenCentrality("C") == 0.0);
+  REQUIRE(w.getBetweenCentrality("D") == 0.0);
+}
+
+TEST_CASE("Page centrality single central nodes", "[Brandes]") {
+  WikiGraph w{"./datasets/centrality/single_central_node.tsv"}; 
+  REQUIRE(w.getBetweenCentrality("A") == 0.0);
+  REQUIRE(w.getBetweenCentrality("B") == 0.0);
+  REQUIRE(w.getBetweenCentrality("C") == 0.0);
+  REQUIRE(w.getBetweenCentrality("D") > 1.0); // is central for many paths.
+  REQUIRE(w.getBetweenCentrality("E") == 0.0);
+  REQUIRE(w.getBetweenCentrality("F") == 0.0);
+  REQUIRE(w.getBetweenCentrality("G") == 0.0);
+}
+
+TEST_CASE("Page centrality two central equal central nodes", "[Brandes]") {
+  WikiGraph w{"./datasets/centrality/two_eq_cent_nodes.tsv"}; 
+  REQUIRE(w.getBetweenCentrality("A") == 0.0);
+  REQUIRE(w.getBetweenCentrality("B") == 0.0);
+  REQUIRE(w.getBetweenCentrality("C") == 0.0);
+  REQUIRE(w.getBetweenCentrality("D") > 1.0); // is central for many paths.
+  REQUIRE(w.getBetweenCentrality("E") == 0.0);
+  REQUIRE(w.getBetweenCentrality("F") == 0.0);
+  REQUIRE(w.getBetweenCentrality("G") == 0.0);
+  REQUIRE(w.getBetweenCentrality("H") > 1.0); // is central for many paths.
+  REQUIRE(w.getBetweenCentrality("D") == w.getBetweenCentrality("H"));
+}
+
+// ------------- Page Rank Test Cases -------------
+
