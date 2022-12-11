@@ -7,12 +7,12 @@
 
 # Running instructions
 1. Compile the progam using `make`.
-2. Run `./bin/exec` with arguments:
+2. Run `./wikigraph` with arguments:
   - (we need a proper driver)
 3. You can run tests by compiling (`make tests`) and running `./bin/tests`. We test the following functionalities:
   - The constructor can read from a TSV file properly
   - The BFS can work on a simple example graph
   - BFS finds the shortest path in a graph with multiple paths
   - BFS can handle graph cycles
-  - (brandes tests)
-  - (pagerank tests)
+  - Brandes algorithm works on various test graphs with obvious node centrality
+  - PageRank algorithm works on various test graphs with obvious rankings
