@@ -4,8 +4,13 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <iostream>
+#include "/workspaces/CS225/cs225-final-project-wikiracer/includes/eigen/Eigen/Dense"
 
 #include "utilities.hpp"
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 // TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
@@ -160,7 +165,51 @@ std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_pa
 // TODO: rankPages()
 std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
   std::vector<RankedPage> ranked_pages;
-  // ...
+
+  MatrixXd outlinks(article_map.size(), article_map.size());
+  VectorXd toMultiply(article_map.size());
+  auto pages = getPages();
+
+  std::map<std::string, int> place_map;
+  for (size_t i = 0; i < pages.size(); i++) {
+    place_map.insert({pages[i], i});
+  }
+
+  double initial_rank = 1.0 / article_map.size();
+  for (size_t i = 0; i < article_map.size(); i++) {
+    toMultiply(i) = initial_rank;
+  }
+
+  for (size_t row = 0; row < article_map.size(); row++) {
+    for (size_t col = 0; col < article_map.size(); col++) {
+      outlinks(row, col) = 0;
+    }
+  }
+
+  for (const auto& page : article_map) {
+    if (page.second.size() == 0) {
+      int page_placement = place_map[page.first];
+      outlinks(page_placement, page_placement) = .15;
+    } else {
+      double col_rank = 1.0 / page.second.size();
+      int col = place_map[page.first];
+      for (const auto& outlink : page.second) {
+        int row = place_map[outlink];
+        outlinks(row, col) = col_rank;
+      }
+    }
+  }
+
+  for (int i = 0; i < 200; i++) {
+    toMultiply = outlinks * toMultiply;
+  }
+
+  for (size_t i = 0; i < article_map.size(); i++) {
+    std::string page = pages[i];
+    RankedPage rank = {page, toMultiply(i)};
+    ranked_pages.push_back(rank);
+  }
+
   return ranked_pages;
 }
 

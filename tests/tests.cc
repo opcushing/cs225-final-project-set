@@ -8,6 +8,7 @@
 #include <vector>
 #include <wikigraph.hpp>
 #include <time.h>
+#include <iostream>
 
 #include "utilities.hpp"
 
@@ -135,5 +136,13 @@ TEST_CASE("BFS matches Dijkstra's given random real data", "real") {
     // there may be multiple shortest paths through the data,
     // but we want to ensure that they are both the shortest
     REQUIRE(bfs_path.size() == dijkstra_path.size());
+  }
+}
+
+TEST_CASE("Pagerank simple", "prk") {
+  WikiGraph w("datasets/easypagerank.tsv");
+  auto ranked = w.rankPages();
+  for (const auto& rank : ranked) {
+    std::cout << rank.title << "    " << rank.rank << std::endl;
   }
 }
