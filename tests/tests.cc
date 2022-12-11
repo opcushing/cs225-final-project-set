@@ -120,7 +120,7 @@ TEST_CASE("Pagerank simple", "prk") {
   WikiGraph w("datasets/pagerank/easypagerank.tsv");
   auto ranked = w.rankPages();
   for (const auto& rank : ranked) {
-    std::cout << rank.title << "    " << rank.rank << std::endl;
+    std::cout << rank.first << "    " << rank.second << std::endl;
   }
 }
 

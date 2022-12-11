@@ -76,7 +76,7 @@ public:
   void brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const;
 
   // PAGE RANK:
-  std::vector<RankedPage> rankPages() const;
+  std::map<std::string, double> rankPages();
 
   // ------ Helpers ---------
 
@@ -112,6 +112,8 @@ private:
   bool validStartAndEnd(const std::string& start, const std::string& end) const;
 
   std::map<std::string, double> centrality_map;
+
+  std::map<std::string, double> page_rank_map;
 
   Graph article_map;
 };

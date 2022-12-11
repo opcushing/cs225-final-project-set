@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
   size_t i = 0;
   for (const auto& ranked_page : ranked_pages) {
-    std::cout << ranked_page.title << " " << ranked_page.rank << std::endl;
+    std::cout << ranked_page.first << " " << ranked_page.second << std::endl;
     if (i++ == 100) {
       break;
     }

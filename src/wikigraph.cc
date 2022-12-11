@@ -122,77 +122,6 @@ double WikiGraph::getBetweenCentrality(const std::string& page) {
   return -1.0; // INVALID VALUE
 }
 
-// TODO: rankPages()
-std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
-
-  std::cout << "-----Ranking Pages-----" << std::endl;
-  
-  std::vector<RankedPage> ranked_pages;
-
-  MatrixXd outlinks(article_map.size(), article_map.size());
-  VectorXd toMultiply(article_map.size());
-  auto pages = getPages();
-
-  std::unordered_map<std::string, int> place_map;
-  for (size_t i = 0; i < pages.size(); i++) {
-    place_map.insert({pages[i], i});
-  }
-
-  double initial_rank = 1.0 / article_map.size();
-  for (size_t i = 0; i < article_map.size(); i++) {
-    toMultiply(i) = initial_rank;
-  }
-
-  for (size_t row = 0; row < article_map.size(); row++) {
-    for (size_t col = 0; col < article_map.size(); col++) {
-      outlinks(row, col) = 0;
-    }
-  }
-
-  // initialize outgoing links in adj matrix
-  for (const auto& page : article_map) {
-    if (page.second.size() != 0) {
-      double col_rank = 1.0 / page.second.size();
-      int col = place_map[page.first];
-      for (const auto& outlink : page.second) {
-        int row = place_map[outlink];
-        outlinks(row, col) = col_rank;
-      }
-    }
-  }
-
-  // dampening matrix
-  MatrixXd r_matrix(article_map.size(), article_map.size());
-
-  for (size_t i = 0; i < article_map.size(); i++) {
-    for (size_t j = 0; j < article_map.size(); j++) {
-      r_matrix(i, j) = 1;
-    }
-  }
-
-  r_matrix = r_matrix / article_map.size();
-
-  // dampen the matrix
-  outlinks = (.85 * outlinks) + (.15 * r_matrix);
-
-
-  const size_t ITER = 200;
-  // Multiply it a bunch!
-  for (size_t i = 0; i < ITER; i++) {
-    displayPageRankProgress(i, ITER);
-    toMultiply = outlinks * toMultiply;
-  }
-
-  // 
-  for (size_t i = 0; i < article_map.size(); i++) {
-    std::string page = pages[i];
-    RankedPage rank = {page, toMultiply(i)};
-    ranked_pages.push_back(rank);
-  }
-
-  return ranked_pages;
-}
-
 // DONE: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() {
   // Adapted from Ulrik Brandes original paper:
@@ -289,6 +218,74 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
   }
 }
 
+// TODO: rankPages()
+std::map<std::string, double> WikiGraph::rankPages() {
+
+  std::cout << "-----Ranking Pages-----" << std::endl;
+
+  MatrixXd outlinks(article_map.size(), article_map.size());
+  VectorXd toMultiply(article_map.size());
+  auto pages = getPages();
+
+  std::unordered_map<std::string, int> place_map;
+  for (size_t i = 0; i < pages.size(); i++) {
+    place_map.insert({pages[i], i});
+  }
+
+  double initial_rank = 1.0 / article_map.size();
+  for (size_t i = 0; i < article_map.size(); i++) {
+    toMultiply(i) = initial_rank;
+  }
+
+  for (size_t row = 0; row < article_map.size(); row++) {
+    for (size_t col = 0; col < article_map.size(); col++) {
+      outlinks(row, col) = 0;
+    }
+  }
+
+  // initialize outgoing links in adj matrix
+  for (const auto& page : article_map) {
+    if (page.second.size() != 0) {
+      double col_rank = 1.0 / page.second.size();
+      int col = place_map[page.first];
+      for (const auto& outlink : page.second) {
+        int row = place_map[outlink];
+        outlinks(row, col) = col_rank;
+      }
+    }
+  }
+
+  // dampening matrix
+  MatrixXd r_matrix(article_map.size(), article_map.size());
+
+  for (size_t i = 0; i < article_map.size(); i++) {
+    for (size_t j = 0; j < article_map.size(); j++) {
+      r_matrix(i, j) = 1;
+    }
+  }
+
+  r_matrix = r_matrix / article_map.size();
+
+  // dampen the matrix
+  outlinks = (.85 * outlinks) + (.15 * r_matrix);
+
+
+  const size_t ITER = 200;
+  // Multiply it a bunch!
+  for (size_t i = 0; i < ITER; i++) {
+    displayPageRankProgress(i, ITER);
+    toMultiply = outlinks * toMultiply;
+  }
+
+  // 
+  for (size_t i = 0; i < article_map.size(); i++) {
+    std::string page = pages[i];
+    page_rank_map.insert({page, toMultiply(i)});
+  }
+
+  return page_rank_map;
+}
+
 //---------- Helper Methods ----------
 
 // TODO: centralityMapToFile()
@@ -330,7 +327,7 @@ void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vec
 }
 
 void WikiGraph::displayPageRankProgress(const size_t& iter, const size_t& total) const {
-  double progress = (double)iter / (double) total;
+  double progress = (double)iter / (double) (total - 1);
   std::cout << "[ Progess: " ;
   std::cout << int(progress * 100.0) << "% ] \r";
   std::cout.flush();
