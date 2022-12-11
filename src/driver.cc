@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "utilities.hpp"
+#include <iomanip>
 
 #include "wikigraph.hpp"
 
@@ -21,12 +22,19 @@ int main(int argc, char* argv[]) {
   */
   WikiGraph w{"./datasets/links.tsv"};
 
-  std::vector<std::string> page_path = w.getPathBFS("Advertising", "Silicon");
+  auto C_B = w.getCentralityMap();
 
-  for (const auto& page : page_path) {
-    std::cout << page << " -> ";
+  // w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
+
+  auto C_B_sort = w.sortCentralityMap(C_B);
+
+  std::cout << "The top ten most central articles are: " << std::endl;
+  for (size_t i = 0; i < 10; ++i) {
+    auto pair = C_B_sort[i];
+    auto article = pair.first;
+    auto centrality = pair.second;
+    std::cout << article << " : " << std::setprecision(2) << std::fixed << centrality << std::endl;
   }
-  std::cout << "[Finished]" << std::endl;
 
   return 0;
 }

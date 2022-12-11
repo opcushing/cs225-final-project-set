@@ -1,13 +1,19 @@
-#include "wikigraph.hpp"
-
 #include <fstream>
+#include <iomanip>
 #include <queue>
+#include <stack>
 #include <limits>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 #include <iostream>
 #include "Eigen/Dense"
 
 #include "utilities.hpp"
+
+#include "wikigraph.hpp"
+
+std::mutex mtx;
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -16,7 +22,7 @@ using Eigen::VectorXd;
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
   // Populates map.
-
+  std::cout << "-----Generating WikiGraph-----" << std::endl;
   // open file
   // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
   std::string file = file_to_string(file_name);
@@ -52,8 +58,8 @@ WikiGraph::WikiGraph(const std::string& file_name) {
   }
 }
 
-// --------- Algorithms ------------
-// TODO: getPathBFS()
+// --------- Algorithms --------------
+// DONE: getPathBFS()
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
 
@@ -102,14 +108,12 @@ std::vector<std::string> WikiGraph::getPathBFS(
   return {page_path.rbegin(), page_path.rend()};
 }
 
-// TODO: getPathDijkstras()
-// weigh edges by inverse of pagerank (popular edges are cheaper)
-// or brande's algorithm
-std::vector<std::string> WikiGraph::getPathDijkstras(const std::string& start_page, const std::string& end_page) const {
-
-  // require start and end exist
-  if (!validStartAndEnd(start_page, end_page)) {
-    throw std::invalid_argument("One or more of these pages are not in the graph");
+// TEST: getBetweenCentrality()
+double WikiGraph::getBetweenCentrality(const std::string& page) {
+  // Note: will possibly be memoized, either from this function or the other.
+  if (centrality_map.empty()) getCentralityMap();
+  if (centrality_map.find(page) != centrality_map.end()) {
+    return centrality_map.at(page);
   }
 
   auto pages = getPages();
@@ -211,6 +215,151 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
   }
 
   return ranked_pages;
+}
+
+// DONE: getCentralityMap()
+std::map<std::string, double> WikiGraph::getCentralityMap() {
+  // Adapted from Ulrik Brandes original paper:
+  // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
+
+  // std::map<std::string, double> centralilty_map;
+
+  // POSSIBLE OPTIMIZATION:
+  // Try to read the centrality map from a file, and return it if it exists.
+  // centralilty_map = centralityMapFromFile("./centrality/wikigraph_centrality_map.tsv");
+  // if (!centralilty_map.empty()) {
+  //   return centralilty_map;
+  // }
+
+  // Otherwise, run the algorithm / produce the centrality map:
+  std::cout << "------ Producing Centrality Map ------" << std::endl;
+  const std::vector<std::string>& pages = getPages();
+  SafeQueue pages_queue;
+
+  for (const auto& page : pages) {
+    centrality_map[page] = 0.0;
+    pages_queue.push(page);
+  }
+
+  // Spawn multiple threads to run algorithm
+  std::vector<std::thread> threads;
+  const size_t THREAD_COUNT = 10;
+  for (size_t thread_idx = 0; thread_idx < THREAD_COUNT; ++thread_idx) {
+    threads.push_back(std::thread(&WikiGraph::threadHelper, this, std::ref(pages_queue), std::ref(centrality_map), pages));
+  }
+
+  // Wait for the threads to finish
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  // centralityMapToFile(centrality_map, "./output/centrality_map.tsv");
+
+  return centrality_map; 
+}
+
+void WikiGraph::threadHelper(SafeQueue& q, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const {
+  std::optional<std::string> curr_page = q.pop();
+  while (curr_page.has_value()) {
+    displayCentralityProgress(q, pages);
+    brandesHelper(curr_page.value(), centrality_map, pages);
+    curr_page = q.pop();
+  }
+}
+
+void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const {
+  // One run of the Brandes algorithm for a starting node.
+  // std::cout << "Thread starting page: " << start << std::endl;
+  std::stack<std::string> S;
+  std::unordered_map<std::string, std::vector<std::string>> predecessor;
+  for (const auto& page : pages) predecessor[page] = {};
+  std::unordered_map<std::string, double> sigma;
+  for (const auto& page : pages) sigma[page] = 0.0;
+  sigma[start] = 1.0;
+  std::unordered_map<std::string, int> dist;
+  for (const auto& page : pages) dist[page] = -1;
+  dist[start] = 0;
+  std::queue<std::string> Q;
+  Q.push(start);
+  while(!Q.empty()) {
+    std::string v = Q.front(); Q.pop();
+    S.push(v);
+    for (const auto& w : article_map.at(v)) {
+      if (dist[w] < 0) {
+        Q.push(w);
+        dist[w] = dist[v] + 1;
+      }
+      if (dist[w] == dist[v] + 1) {
+        sigma[w] = sigma[w] + sigma[v];
+        predecessor[w].push_back(v);
+      }
+    }
+  }
+
+  std::unordered_map<std::string, double> delta;
+  for (const auto& page : pages) delta[page] = 0.0;
+  while (!S.empty()) {
+    std::string w = S.top(); S.pop();
+    for (const auto& v : predecessor[w]) {
+      delta[v] += ( sigma[v] / sigma[w] ) * (1.0 + delta[w]);
+    }
+    if (w != start) {
+      if (delta[w] != 0.0) {
+        mtx.lock(); // Ensure read/write collosion to shared result don't occur.
+        centrality_map[w] += delta[w];
+        mtx.unlock();
+      }
+    }
+  }
+}
+
+//---------- Helper Methods ----------
+
+// TODO: centralityMapToFile()
+void WikiGraph::centralityMapToFile(const std::map<std::string, double>& centrality_map, const std::string& file_name) const {
+  std::ofstream map_file(file_name);
+  if (map_file.is_open()) {
+    for (const auto& [page, value] : centrality_map) {
+      map_file << page << "\t" << std::setprecision(3) << std::fixed << value << "\n";
+    }
+  }
+}
+
+std::map<std::string, double> WikiGraph::centralityMapFromFile(const std::string& file_name) const {
+  std::map<std::string, double> centralilty_map;
+  std::string centrality_str = file_to_string(file_name);
+  if (!centrality_str.empty()) {
+    std::vector<std::string> lines;
+    SplitString(centrality_str, '\n', lines);  
+    if (lines.back().empty()) lines.pop_back(); 
+    for (const auto& line : lines) {
+      std::vector<std::string> pair;
+      SplitString(line, '\t', pair);
+      centralilty_map[pair[0]] = std::stod(pair[1]);
+    }
+    return centralilty_map;
+  }
+  return {};
+}
+
+void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const {
+  float pages_to_go = (float)queue.size();
+  float total_pages = (float)pages.size();
+  float pages_complete = total_pages - pages_to_go;
+  float progress = pages_complete  / total_pages;
+  std::cout << "[ Progess: " << pages_complete << "/" << total_pages << " ";
+  std::cout << int(progress * 100.0) << "% ] \r";
+  std::cout.flush();
+  if (progress == 1.0) std::cout << std::endl;
+}
+
+std::vector<std::pair<std::string, double>> WikiGraph::sortCentralityMap(const std::map<std::string, double>& centrality_map) const {
+  std::vector<std::pair<std::string, double>> vector(centrality_map.begin(), centrality_map.end());
+  std::sort(vector.begin(), vector.end(), 
+  [](const std::pair<std::string, int> &a, const std::pair<std::string, int> &b) {
+    return a.second > b.second;
+  });
+  return vector;
 }
 
 bool WikiGraph::validStartAndEnd(const std::string& start_page, const std::string& end_page) const {
