@@ -76,6 +76,8 @@ public:
   void brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const;
 
   // PAGE RANK:
+  double getPageRank(const std::string& page);
+
   std::map<std::string, double> rankPages();
 
   // ------ Helpers ---------

@@ -63,7 +63,7 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 }
 
 // --------- Algorithms --------------
-// DONE: getPathBFS()
+
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
 
@@ -112,17 +112,15 @@ std::vector<std::string> WikiGraph::getPathBFS(
   return {page_path.rbegin(), page_path.rend()};
 }
 
-// TEST: getBetweenCentrality()
 double WikiGraph::getBetweenCentrality(const std::string& page) {
   // Note: will possibly be memoized, either from this function or the other.
-  if (centrality_map.empty()) centrality_map = getCentralityMap();
+  if (centrality_map.empty()) getCentralityMap();
   if (centrality_map.find(page) != centrality_map.end()) {
     return centrality_map.at(page);
   }
   return -1.0; // INVALID VALUE
 }
 
-// DONE: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() {
   // Adapted from Ulrik Brandes original paper:
   // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
@@ -219,6 +217,15 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
 }
 
 // TODO: rankPages()
+double WikiGraph::getPageRank(const std::string& page) {
+  // Note: will possibly be memoized, either from this function or the other.
+  if (page_rank_map.empty()) rankPages();
+  if (page_rank_map.find(page) != page_rank_map.end()) {
+    return page_rank_map.at(page);
+  }
+  return -1.0; // INVALID VALUE
+}
+
 std::map<std::string, double> WikiGraph::rankPages() {
 
   std::cout << "-----Ranking Pages-----" << std::endl;

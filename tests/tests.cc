@@ -12,6 +12,10 @@
 
 #include "utilities.hpp"
 
+bool reasonablyEqual(const double& a, const double& b) {
+  return std::abs(a - b) < 0.000000001;
+}
+
 TEST_CASE("Intake test", "[constructor]") {
   // python >:)
   std::map<std::string, std::vector<std::string>> expected = 
@@ -116,12 +120,21 @@ TEST_CASE("Page centrality two central equal central nodes", "[Brandes]") {
   REQUIRE(w.getBetweenCentrality("D") == w.getBetweenCentrality("H"));
 }
 
-TEST_CASE("Pagerank simple", "prk") {
-  WikiGraph w("datasets/pagerank/easypagerank.tsv");
-  auto ranked = w.rankPages();
-  for (const auto& rank : ranked) {
-    std::cout << rank.first << "    " << rank.second << std::endl;
-  }
+TEST_CASE("Pagerank Two pages all connected should be equal", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/two_page_all.tsv");
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 0.5));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 0.5));
+}
+
+TEST_CASE("Pagerank Three pages all connected should be equal", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/three_page_all.tsv");
+  REQUIRE(w.getPageRank("a") == w.getPageRank("b"));
+  REQUIRE(w.getPageRank("b") == w.getPageRank("c"));
+  REQUIRE(w.getPageRank("a") == w.getPageRank("c"));
+
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("c"), 1.0 / 3.0));
 }
 
 // ------------- Page Rank Test Cases -------------
