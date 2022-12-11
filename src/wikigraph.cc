@@ -18,7 +18,6 @@ std::mutex mtx;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
-// TODO: Construct from File
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
   // Populates map.
@@ -37,6 +36,10 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 
   std::map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
+    // TODO: possibly display the progress of constructing the graph?
+    // It's a short operation, but may be helpful to see that the constructor
+    // is processing.
+
     // don't process lines with comments
     if (line[0] == '#') continue;
     std::vector<std::string> pages;
@@ -59,7 +62,6 @@ WikiGraph::WikiGraph(const std::string& file_name) {
       article_map[dest];
     }
   }
-  std::cout << "Done!" << std::endl;
 }
 
 // --------- Algorithms --------------
@@ -216,9 +218,7 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
   }
 }
 
-// TODO: rankPages()
 double WikiGraph::getPageRank(const std::string& page) {
-  // Note: will possibly be memoized, either from this function or the other.
   if (page_rank_map.empty()) rankPages();
   if (page_rank_map.find(page) != page_rank_map.end()) {
     return page_rank_map.at(page);
@@ -229,9 +229,6 @@ double WikiGraph::getPageRank(const std::string& page) {
 std::map<std::string, double> WikiGraph::rankPages() {
 
   std::cout << "-----Ranking Pages-----" << std::endl;
-
-  // std::cout << "Article Map Size: " << article_map.size() << std::endl;
-  // std::cout << "Pages Size: " << getPages().size() << std::endl;
 
   MatrixXd outlinks(article_map.size(), article_map.size());
   VectorXd toMultiply(article_map.size());
@@ -284,20 +281,14 @@ std::map<std::string, double> WikiGraph::rankPages() {
   // dampen the matrix
   outlinks = (.85 * outlinks) + (.15 * r_matrix);
 
-  // std::cout << outlinks(0, 0) << " " << outlinks(0, 1) << std::endl;
-  // std::cout << outlinks(1, 0) << " " << outlinks(1, 1) << std::endl;
-
   const size_t ITER = 200;
   // Multiply it a bunch!
   for (size_t i = 0; i < ITER; i++) {
     displayPageRankProgress(i, ITER);
-    // std::cout << "---------------------" << std::endl;
-    // std::cout << toMultiply << std::endl;
-    // std::cout << "---------------------" << std::endl;
     toMultiply = outlinks * toMultiply;
   }
 
-  // 
+  // insert the ranks into the map.
   for (size_t i = 0; i < article_map.size(); i++) {
     std::string page = pages[i];
     page_rank_map.insert({page, toMultiply(i)});
@@ -371,7 +362,6 @@ std::vector<std::pair<std::string, double>> WikiGraph::getSortedPageRank() {
   [](const std::pair<std::string, double> &a, const std::pair<std::string, double> &b) {
     return a.second > b.second;
   });
-  std::cout << "sorted" << std::endl;
   return vector;
 }
 
@@ -386,6 +376,5 @@ std::vector<std::string> WikiGraph::getPages() const {
       [](decltype(article_map)::value_type const &kv) {
           return kv.first;
       });
-
   return pages;
 }
