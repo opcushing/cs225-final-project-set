@@ -13,7 +13,7 @@
 #include "utilities.hpp"
 
 bool reasonablyEqual(const double& a, const double& b) {
-  return std::abs(a - b) < 0.000000001;
+  return std::abs(a - b) < 0.001;
 }
 
 TEST_CASE("Intake test", "[constructor]") {
@@ -135,6 +135,17 @@ TEST_CASE("Pagerank Three pages all connected should be equal", "[Pagerank]") {
   REQUIRE(reasonablyEqual(w.getPageRank("a"), 1.0 / 3.0));
   REQUIRE(reasonablyEqual(w.getPageRank("b"), 1.0 / 3.0));
   REQUIRE(reasonablyEqual(w.getPageRank("c"), 1.0 / 3.0));
+}
+
+TEST_CASE("Pagerank Two pages directed", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/two_page_dir.tsv");
+  double a_page_rank = w.getPageRank("a");
+  double b_page_rank = w.getPageRank("b");
+  REQUIRE(a_page_rank < b_page_rank);
+  // Note: values were calculated from this website: 
+  // https://computerscience.chemeketa.edu/cs160Reader/_static/pageRankApp/index.html
+  REQUIRE(reasonablyEqual(a_page_rank, 0.3508));
+  REQUIRE(reasonablyEqual(b_page_rank, 0.6491));
 }
 
 // ------------- Page Rank Test Cases -------------

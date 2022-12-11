@@ -230,6 +230,9 @@ std::map<std::string, double> WikiGraph::rankPages() {
 
   std::cout << "-----Ranking Pages-----" << std::endl;
 
+  // std::cout << "Article Map Size: " << article_map.size() << std::endl;
+  // std::cout << "Pages Size: " << getPages().size() << std::endl;
+
   MatrixXd outlinks(article_map.size(), article_map.size());
   VectorXd toMultiply(article_map.size());
   auto pages = getPages();
@@ -259,6 +262,11 @@ std::map<std::string, double> WikiGraph::rankPages() {
         int row = place_map[outlink];
         outlinks(row, col) = col_rank;
       }
+    } else {
+      int col = place_map[page.first];
+      for (size_t i = 0; i < article_map.size(); i++) {
+        outlinks(i, col) = 1.0 / article_map.size();
+      }
     }
   }
 
@@ -276,11 +284,16 @@ std::map<std::string, double> WikiGraph::rankPages() {
   // dampen the matrix
   outlinks = (.85 * outlinks) + (.15 * r_matrix);
 
+  // std::cout << outlinks(0, 0) << " " << outlinks(0, 1) << std::endl;
+  // std::cout << outlinks(1, 0) << " " << outlinks(1, 1) << std::endl;
 
   const size_t ITER = 200;
   // Multiply it a bunch!
   for (size_t i = 0; i < ITER; i++) {
-    displayPageRankProgress(i, ITER);
+    // displayPageRankProgress(i, ITER);
+    // std::cout << "---------------------" << std::endl;
+    // std::cout << toMultiply << std::endl;
+    // std::cout << "---------------------" << std::endl;
     toMultiply = outlinks * toMultiply;
   }
 

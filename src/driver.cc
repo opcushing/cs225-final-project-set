@@ -20,7 +20,8 @@ int main(int argc, char* argv[]) {
    * Call BFS search on it from the given input
    *  - Maybe -f [from_page] -t [to_page]
   */
-  WikiGraph w{"./datasets/links.tsv"};
+  // WikiGraph w{"./datasets/links.tsv"};
+  WikiGraph w{"./datasets/pagerank/two_page_dir.tsv"};
 
   // auto C_B = w.getCentralityMap();
 
