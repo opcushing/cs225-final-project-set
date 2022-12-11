@@ -2,33 +2,53 @@
 
 #include "utilities.hpp"
 #include <iomanip>
+#include <stdexcept>
 
 #include "wikigraph.hpp"
 
 int main(int argc, char* argv[]) {
   // TODO: Setup I/O
-  /**
-   * Usage: algorithm flag, start page, end page
-   * ex -b "start" "end" (BFS)
-   *    -d "start" "end" (Dijkstra's)
-   *    -p "start" "end" (PageRank)
-  */
-  // WikiGraph w{"./datasets/links.tsv"};
+
+  (void)argv;
+
+  std::stringstream usage;
+  usage << "Usage: \n";
+  usage << "\t./wiki bfs \"start\" \"end\" (BFS: shortest path from start to end)\n\n";
+  usage << "\t./wiki pagerank -t n (list top n ranked pages)\n";
+  usage << "\t./wiki pagerank -p page (find rank of a particular page)\n\n";
+  usage << "\t./wiki brandes -t n (list n most central pages)\n";
+  usage << "\t./wiki brandes -p page (find centrality of a particular page)\n";
+
+  std::string command;
+  std::pair<std::string, std::string> args;
+  size_t range = 0;
+  (void)range;
+  try {
+    if (argc != 4) {
+      throw std::invalid_argument("malformed arguments");
+    } else {
+      command = argv[1];
+      args.first = argv[2];
+      args.second = argv[3];
+
+      if (command != "bfs" && command != "brandes" && command != "pagerank")
+        throw std::invalid_argument("invalid command");
+      else if (command != "bfs") {
+        if (args.first != "-t" && args.first != "-p")
+          throw std::invalid_argument("invalid flags");
+        else if (args.first == "-t")
+          range = std::stoi(args.second);
+      }
+    }
+  } catch (std::exception& e) {
+    std::cout << e.what() << std::endl;
+    std::cout << usage.str() << std::endl;
+    return 1;
+  }
+
   WikiGraph w{"./datasets/links.tsv"};
-
-  // auto C_B = w.getCentralityMap();
-
-  // w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
-
-  // auto C_B_sort = w.getSortedCentrality();
-
-  // std::cout << "The top ten most central articles are: " << std::endl;
-  // for (size_t i = 0; i < 10; ++i) {
-  //   auto pair = C_B_sort[i];
-  //   auto article = pair.first;
-  //   auto centrality = pair.second;
-  //   std::cout << article << " : " << std::setprecision(2) << std::fixed << centrality << std::endl;
-  // }
+  
+  
 
   auto ranked_pages = w.rankPages();
 
