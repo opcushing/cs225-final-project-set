@@ -10,11 +10,11 @@ int main(int argc, char* argv[]) {
 
   std::stringstream usage;
   usage << "Usage: \n";
-  usage << "\t./wiki bfs \"start\" \"end\" (BFS: shortest path from start to end)\n\n";
-  usage << "\t./wiki pagerank -t n (list top n ranked pages)\n";
-  usage << "\t./wiki pagerank -p page (find rank of a particular page)\n\n";
-  usage << "\t./wiki brandes -t n (list n most central pages)\n";
-  usage << "\t./wiki brandes -p page (find centrality of a particular page)\n";
+  usage << "\t./wikigraph bfs \"start\" \"end\" (BFS: shortest path from start to end)\n\n";
+  usage << "\t./wikigraph pagerank -t n (list top n ranked pages)\n";
+  usage << "\t./wikigraph pagerank -p page (find rank of a particular page)\n\n";
+  usage << "\t./wikigraph brandes -t n (list n most central pages)\n";
+  usage << "\t./wikigraph brandes -p page (find centrality of a particular page)\n";
 
   std::string command;
   std::pair<std::string, std::string> args;
