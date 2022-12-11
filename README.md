@@ -6,7 +6,7 @@
 - The results writeup can be found in `results.md`.
 
 # Running instructions
-1. Compile the progam using `make`.
+1. Compile the progam using `make`. This will compile to `./bin/exec`.
 2. Run `./wikigraph` with arguments:
   - `bfs "A" "B"` for the shortest path from A to B
   - `pagerank -t n` for the top `n` ranked pages
