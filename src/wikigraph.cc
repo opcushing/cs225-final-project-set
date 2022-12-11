@@ -111,59 +111,11 @@ std::vector<std::string> WikiGraph::getPathBFS(
 // TEST: getBetweenCentrality()
 double WikiGraph::getBetweenCentrality(const std::string& page) {
   // Note: will possibly be memoized, either from this function or the other.
-  if (centrality_map.empty()) getCentralityMap();
+  if (centrality_map.empty()) centrality_map = getCentralityMap();
   if (centrality_map.find(page) != centrality_map.end()) {
     return centrality_map.at(page);
   }
-
-  auto pages = getPages();
-
- // init distance and predecessor
- std::map<std::string, int> distance;
- std::map<std::string, std::string> predecessor;
- for (const auto& page: pages) {
-  distance[page] = std::numeric_limits<int>::max();
-  predecessor[page] = "";
- }
- distance[start_page] = 0;
-
- // priority is minimum distance, represented by this lambda expression
- auto priority = [&distance](std::string a, std::string b) {
-    return distance.at(a) > distance.at(b);
-  };
-
- // construct the priority queue based on the pages (keys in article_map)
- std::priority_queue<std::string, std::vector<std::string>, decltype(priority)> q{priority};
- q.push(start_page);
-
-  // go through the edges
-  while (!q.empty()) {
-    std::string curr = q.top();
-    q.pop();
-    for (const auto& neighbor : article_map.at(curr)) {
-      if (1 + distance[curr] < distance[neighbor]) {
-        distance[neighbor] = 1 + distance[curr];
-        predecessor[neighbor] = curr;
-        q.push(neighbor);
-      }
-    }
-  }
-
-  // construct the path using the predecessor map
-  std::vector<std::string> path;
-  path.push_back(end_page);
-
-  while (path.back() != start_page && predecessor[path.back()] != "") {
-    path.push_back(predecessor[path.back()]);
-  }
-
-  // there is no path from the start to the end
-  if (std::find(path.begin(), path.end(), start_page) == path.end()) {
-    throw std::runtime_error("There is no path between these articles");
-  }
-  
-  // return the reversed version (start -> end)
-  return {path.rbegin(), path.rend()};
+  return -1.0; // INVALID VALUE
 }
 
 // TODO: rankPages()
