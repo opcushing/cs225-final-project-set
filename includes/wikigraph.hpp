@@ -76,7 +76,9 @@ public:
   void brandesHelper(const std::string& start, std::map<std::string, double>& centrality_map, const std::vector<std::string>& pages) const;
 
   // PAGE RANK:
-  std::vector<RankedPage> rankPages() const;
+  double getPageRank(const std::string& page);
+
+  std::map<std::string, double> rankPages();
 
   // ------ Helpers ---------
 
@@ -102,7 +104,11 @@ public:
   */
   void displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const;
 
-  std::vector<std::pair<std::string, double>> sortCentralityMap(const std::map<std::string, double>& centrality_map) const;
+  void displayPageRankProgress(const size_t& iter, const size_t& total) const;
+
+  std::vector<std::pair<std::string, double>> getSortedCentrality();
+
+  std::vector<std::pair<std::string, double>> getSortedPageRank();
 
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
@@ -110,6 +116,8 @@ private:
   bool validStartAndEnd(const std::string& start, const std::string& end) const;
 
   std::map<std::string, double> centrality_map;
+
+  std::map<std::string, double> page_rank_map;
 
   Graph article_map;
 };

@@ -26,7 +26,7 @@ std::string DecodeURL(const std::string& url_str) {
 
 // All code below taken from CS225 mp_schedule utils.cc
 
-std::string file_to_string(const std::string& filename){
+std::string file_to_string(const std::string& filename) {
   std::ifstream text(filename);
 
   std::stringstream strStream;

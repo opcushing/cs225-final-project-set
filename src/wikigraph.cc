@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <thread>
 #include <mutex>
+#include <iostream>
+#include "Eigen/Dense"
 
 #include "utilities.hpp"
 
@@ -13,14 +15,19 @@
 
 std::mutex mtx;
 
-// TODO: Construct from File
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
   // Populates map.
-  std::cout << "-----Generating WikiGraph-----" << std::endl;
+  std::cout << "-----Generating Wikigraph-----" << std::endl;
   // open file
   // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
   std::string file = file_to_string(file_name);
+
+  if (file.empty()) throw std::runtime_error("Wikigraph File Not Found!");
+
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
   // our dataset has a line of empty space that we can discard
@@ -29,6 +36,10 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 
   std::map<std::string, std::string> decoded; // memoize decoding
   for (auto& line : lines) {
+    // TODO: possibly display the progress of constructing the graph?
+    // It's a short operation, but may be helpful to see that the constructor
+    // is processing.
+
     // don't process lines with comments
     if (line[0] == '#') continue;
     std::vector<std::string> pages;
@@ -54,7 +65,7 @@ WikiGraph::WikiGraph(const std::string& file_name) {
 }
 
 // --------- Algorithms --------------
-// DONE: getPathBFS()
+
 std::vector<std::string> WikiGraph::getPathBFS(
     const std::string& start_page, const std::string& end_page) const {
 
@@ -103,24 +114,15 @@ std::vector<std::string> WikiGraph::getPathBFS(
   return {page_path.rbegin(), page_path.rend()};
 }
 
-// TEST: getBetweenCentrality()
 double WikiGraph::getBetweenCentrality(const std::string& page) {
   // Note: will possibly be memoized, either from this function or the other.
   if (centrality_map.empty()) getCentralityMap();
   if (centrality_map.find(page) != centrality_map.end()) {
     return centrality_map.at(page);
   }
-  return -1.0; // INVALID VALUE.
+  return -1.0; // INVALID VALUE
 }
 
-// TODO: rankPages()
-std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
-  std::vector<RankedPage> ranked_pages;
-  // ...
-  return ranked_pages;
-}
-
-// DONE: getCentralityMap()
 std::map<std::string, double> WikiGraph::getCentralityMap() {
   // Adapted from Ulrik Brandes original paper:
   // https://snap.stanford.edu/class/cs224w-readings/brandes01centrality.pdf#page=10
@@ -216,6 +218,85 @@ void WikiGraph::brandesHelper(const std::string& start, std::map<std::string, do
   }
 }
 
+double WikiGraph::getPageRank(const std::string& page) {
+  if (page_rank_map.empty()) rankPages();
+  if (page_rank_map.find(page) != page_rank_map.end()) {
+    return page_rank_map.at(page);
+  }
+  return -1.0; // INVALID VALUE
+}
+
+std::map<std::string, double> WikiGraph::rankPages() {
+
+  std::cout << "-----Ranking Pages-----" << std::endl;
+
+  MatrixXd outlinks(article_map.size(), article_map.size());
+  VectorXd toMultiply(article_map.size());
+  auto pages = getPages();
+
+  std::unordered_map<std::string, int> place_map;
+  for (size_t i = 0; i < pages.size(); i++) {
+    place_map.insert({pages[i], i});
+  }
+
+  double initial_rank = 1.0 / article_map.size();
+  for (size_t i = 0; i < article_map.size(); i++) {
+    toMultiply(i) = initial_rank;
+  }
+
+  for (size_t row = 0; row < article_map.size(); row++) {
+    for (size_t col = 0; col < article_map.size(); col++) {
+      outlinks(row, col) = 0;
+    }
+  }
+
+  // initialize outgoing links in adj matrix
+  for (const auto& page : article_map) {
+    if (page.second.size() != 0) {
+      double col_rank = 1.0 / page.second.size();
+      int col = place_map[page.first];
+      for (const auto& outlink : page.second) {
+        int row = place_map[outlink];
+        outlinks(row, col) = col_rank;
+      }
+    } else {
+      int col = place_map[page.first];
+      for (size_t i = 0; i < article_map.size(); i++) {
+        outlinks(i, col) = 1.0 / article_map.size();
+      }
+    }
+  }
+
+  // dampening matrix
+  MatrixXd r_matrix(article_map.size(), article_map.size());
+
+  for (size_t i = 0; i < article_map.size(); i++) {
+    for (size_t j = 0; j < article_map.size(); j++) {
+      r_matrix(i, j) = 1;
+    }
+  }
+
+  r_matrix = r_matrix / article_map.size();
+
+  // dampen the matrix
+  outlinks = (.85 * outlinks) + (.15 * r_matrix);
+
+  const size_t ITER = 200;
+  // Multiply it a bunch!
+  for (size_t i = 0; i < ITER; i++) {
+    displayPageRankProgress(i, ITER);
+    toMultiply = outlinks * toMultiply;
+  }
+
+  // insert the ranks into the map.
+  for (size_t i = 0; i < article_map.size(); i++) {
+    std::string page = pages[i];
+    page_rank_map.insert({page, toMultiply(i)});
+  }
+
+  return page_rank_map;
+}
+
 //---------- Helper Methods ----------
 
 // TODO: centralityMapToFile()
@@ -256,10 +337,29 @@ void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vec
   if (progress == 1.0) std::cout << std::endl;
 }
 
-std::vector<std::pair<std::string, double>> WikiGraph::sortCentralityMap(const std::map<std::string, double>& centrality_map) const {
+void WikiGraph::displayPageRankProgress(const size_t& iter, const size_t& total) const {
+  double progress = (double)iter / (double) (total - 1);
+  std::cout << "[ Progess: " ;
+  std::cout << int(progress * 100.0) << "% ] \r";
+  std::cout.flush();
+  if (progress == 1.0) std::cout << std::endl;
+}
+
+std::vector<std::pair<std::string, double>> WikiGraph::getSortedCentrality() {
+  if (centrality_map.empty()) getCentralityMap();
   std::vector<std::pair<std::string, double>> vector(centrality_map.begin(), centrality_map.end());
   std::sort(vector.begin(), vector.end(), 
-  [](const std::pair<std::string, int> &a, const std::pair<std::string, int> &b) {
+  [](const std::pair<std::string, double> &a, const std::pair<std::string, double> &b) {
+    return a.second > b.second;
+  });
+  return vector;
+}
+
+std::vector<std::pair<std::string, double>> WikiGraph::getSortedPageRank() {
+  if (page_rank_map.empty()) rankPages();
+  std::vector<std::pair<std::string, double>> vector(page_rank_map.begin(), page_rank_map.end());
+  std::sort(vector.begin(), vector.end(), 
+  [](const std::pair<std::string, double> &a, const std::pair<std::string, double> &b) {
     return a.second > b.second;
   });
   return vector;
@@ -276,6 +376,5 @@ std::vector<std::string> WikiGraph::getPages() const {
       [](decltype(article_map)::value_type const &kv) {
           return kv.first;
       });
-
   return pages;
 }

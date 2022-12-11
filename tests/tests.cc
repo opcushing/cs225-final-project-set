@@ -8,8 +8,13 @@
 #include <vector>
 #include <wikigraph.hpp>
 #include <time.h>
+#include <iostream>
 
 #include "utilities.hpp"
+
+bool reasonablyEqual(const double& a, const double& b) {
+  return std::abs(a - b) < 0.001;
+}
 
 TEST_CASE("Intake test", "[constructor]") {
   // python >:)
@@ -113,6 +118,54 @@ TEST_CASE("Page centrality two central equal central nodes", "[Brandes]") {
   REQUIRE(w.getBetweenCentrality("G") == 0.0);
   REQUIRE(w.getBetweenCentrality("H") > 1.0); // is central for many paths.
   REQUIRE(w.getBetweenCentrality("D") == w.getBetweenCentrality("H"));
+}
+
+TEST_CASE("Pagerank Two pages all connected should be equal", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/two_page_all.tsv");
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 0.5));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 0.5));
+}
+
+TEST_CASE("Pagerank Three pages all connected should be equal", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/three_page_all.tsv");
+  REQUIRE(w.getPageRank("a") == w.getPageRank("b"));
+  REQUIRE(w.getPageRank("b") == w.getPageRank("c"));
+  REQUIRE(w.getPageRank("a") == w.getPageRank("c"));
+
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("c"), 1.0 / 3.0));
+}
+
+TEST_CASE("Pagerank Two pages directed", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/two_page_dir.tsv");
+  double a_page_rank = w.getPageRank("a");
+  double b_page_rank = w.getPageRank("b");
+  REQUIRE(a_page_rank < b_page_rank);
+  // Note: values were calculated from this website: 
+  // https://computerscience.chemeketa.edu/cs160Reader/_static/pageRankApp/index.html
+  REQUIRE(reasonablyEqual(a_page_rank, 0.3508));
+  REQUIRE(reasonablyEqual(b_page_rank, 0.6491));
+}
+
+TEST_CASE("Pagerank Three pages directed", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/three_page_cycle.tsv");
+  REQUIRE(w.getPageRank("a") == w.getPageRank("b"));
+  REQUIRE(w.getPageRank("b") == w.getPageRank("c"));
+  REQUIRE(w.getPageRank("a") == w.getPageRank("c"));
+
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("c"), 1.0 / 3.0));
+}
+
+TEST_CASE("Pagerank real data set", "[Pagerank]") {
+  WikiGraph w("datasets/links.tsv");
+  double total = 0.0;
+  for (const auto& page : w.getPages()) {
+    total += w.getPageRank(page);
+  }
+  REQUIRE(reasonablyEqual(total, 1.0));
 }
 
 // ------------- Page Rank Test Cases -------------
