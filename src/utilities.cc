@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-// TODO: DecodeURL()
+// DONE: DecodeURL()
 std::string DecodeURL(const std::string& url_str) {
   std::stringstream out;
   for (size_t i = 0; i < url_str.size(); ++i) {
@@ -16,7 +16,7 @@ std::string DecodeURL(const std::string& url_str) {
       out << (char)(std::stoi(url_str.substr(i+1, 2), nullptr, 16));
       i += 2; // skip the next two characters
     } else if (url_str[i] == '_') { // handle space
-      out << " ";
+      out << (url_str[i+1] == '_' ? ": " : " ");
     } else {
       out << url_str[i];
     }
@@ -26,7 +26,7 @@ std::string DecodeURL(const std::string& url_str) {
 
 // All code below taken from CS225 mp_schedule utils.cc
 
-std::string file_to_string(const std::string& filename){
+std::string file_to_string(const std::string& filename) {
   std::ifstream text(filename);
 
   std::stringstream strStream;
