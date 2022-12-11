@@ -143,10 +143,7 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
   }
 
   for (const auto& page : article_map) {
-    if (page.second.size() == 0) {
-      int page_placement = place_map[page.first];
-      outlinks(page_placement, page_placement) = .15;
-    } else {
+    if (page.second.size() != 0) {
       double col_rank = 1.0 / page.second.size();
       int col = place_map[page.first];
       for (const auto& outlink : page.second) {
@@ -155,6 +152,18 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
       }
     }
   }
+
+  MatrixXd r_matrix(article_map.size(), article_map.size());
+
+  for (size_t i = 0; i < article_map.size(); i++) {
+    for (size_t j = 0; j < article_map.size(); j++) {
+      r_matrix(i, j) = 1;
+    }
+  }
+
+  r_matrix = r_matrix / article_map.size();
+
+  outlinks = (.85 * outlinks) + (.15 * r_matrix);
 
   for (int i = 0; i < 200; i++) {
     toMultiply = outlinks * toMultiply;
