@@ -148,5 +148,25 @@ TEST_CASE("Pagerank Two pages directed", "[Pagerank]") {
   REQUIRE(reasonablyEqual(b_page_rank, 0.6491));
 }
 
+TEST_CASE("Pagerank Three pages directed", "[Pagerank]") {
+  WikiGraph w("datasets/pagerank/three_page_cycle.tsv");
+  REQUIRE(w.getPageRank("a") == w.getPageRank("b"));
+  REQUIRE(w.getPageRank("b") == w.getPageRank("c"));
+  REQUIRE(w.getPageRank("a") == w.getPageRank("c"));
+
+  REQUIRE(reasonablyEqual(w.getPageRank("a"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("b"), 1.0 / 3.0));
+  REQUIRE(reasonablyEqual(w.getPageRank("c"), 1.0 / 3.0));
+}
+
+TEST_CASE("Pagerank real data set", "[Pagerank]") {
+  WikiGraph w("datasets/links.tsv");
+  double total = 0.0;
+  for (const auto& page : w.getPages()) {
+    total += w.getPageRank(page);
+  }
+  REQUIRE(reasonablyEqual(total, 1.0));
+}
+
 // ------------- Page Rank Test Cases -------------
 
