@@ -4,7 +4,6 @@
 #include <stack>
 #include <limits>
 #include <algorithm>
-#include <stack>
 #include <thread>
 #include <mutex>
 #include <iostream>
