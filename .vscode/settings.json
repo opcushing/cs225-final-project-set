@@ -91,6 +91,22 @@
     "cfenv": "cpp",
     "cinttypes": "cpp",
     "dense": "cpp",
-    "csignal": "cpp"
+    "csignal": "cpp",
+    "any": "cpp",
+    "barrier": "cpp",
+    "charconv": "cpp",
+    "codecvt": "cpp",
+    "coroutine": "cpp",
+    "csetjmp": "cpp",
+    "cuchar": "cpp",
+    "forward_list": "cpp",
+    "source_location": "cpp",
+    "latch": "cpp",
+    "ranges": "cpp",
+    "scoped_allocator": "cpp",
+    "shared_mutex": "cpp",
+    "span": "cpp",
+    "syncstream": "cpp",
+    "typeindex": "cpp"
   }
 }
