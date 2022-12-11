@@ -290,7 +290,7 @@ std::map<std::string, double> WikiGraph::rankPages() {
   const size_t ITER = 200;
   // Multiply it a bunch!
   for (size_t i = 0; i < ITER; i++) {
-    // displayPageRankProgress(i, ITER);
+    displayPageRankProgress(i, ITER);
     // std::cout << "---------------------" << std::endl;
     // std::cout << toMultiply << std::endl;
     // std::cout << "---------------------" << std::endl;
@@ -354,12 +354,24 @@ void WikiGraph::displayPageRankProgress(const size_t& iter, const size_t& total)
   if (progress == 1.0) std::cout << std::endl;
 }
 
-std::vector<std::pair<std::string, double>> WikiGraph::sortCentralityMap(const std::map<std::string, double>& centrality_map) const {
+std::vector<std::pair<std::string, double>> WikiGraph::getSortedCentrality() {
+  if (centrality_map.empty()) getCentralityMap();
   std::vector<std::pair<std::string, double>> vector(centrality_map.begin(), centrality_map.end());
   std::sort(vector.begin(), vector.end(), 
-  [](const std::pair<std::string, int> &a, const std::pair<std::string, int> &b) {
+  [](const std::pair<std::string, double> &a, const std::pair<std::string, double> &b) {
     return a.second > b.second;
   });
+  return vector;
+}
+
+std::vector<std::pair<std::string, double>> WikiGraph::getSortedPageRank() {
+  if (page_rank_map.empty()) rankPages();
+  std::vector<std::pair<std::string, double>> vector(page_rank_map.begin(), page_rank_map.end());
+  std::sort(vector.begin(), vector.end(), 
+  [](const std::pair<std::string, double> &a, const std::pair<std::string, double> &b) {
+    return a.second > b.second;
+  });
+  std::cout << "sorted" << std::endl;
   return vector;
 }
 

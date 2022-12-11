@@ -21,13 +21,13 @@ int main(int argc, char* argv[]) {
    *  - Maybe -f [from_page] -t [to_page]
   */
   // WikiGraph w{"./datasets/links.tsv"};
-  WikiGraph w{"./datasets/pagerank/two_page_dir.tsv"};
+  WikiGraph w{"./datasets/links.tsv"};
 
   // auto C_B = w.getCentralityMap();
 
   // w.centralityMapToFile(C_B, "wikigraph_centrality_map.tsv");
 
-  // auto C_B_sort = w.sortCentralityMap(C_B);
+  // auto C_B_sort = w.getSortedCentrality();
 
   // std::cout << "The top ten most central articles are: " << std::endl;
   // for (size_t i = 0; i < 10; ++i) {
@@ -39,14 +39,15 @@ int main(int argc, char* argv[]) {
 
   auto ranked_pages = w.rankPages();
 
-  size_t i = 0;
-  for (const auto& ranked_page : ranked_pages) {
-    std::cout << ranked_page.first << " " << ranked_page.second << std::endl;
-    if (i++ == 100) {
-      break;
-    }
-  }
+  auto page_rank_sorted = w.getSortedPageRank();
 
+  std::cout << "The ten highest ranked articles are: " << std::endl;
+  for (size_t i = 0; i < 10; ++i) {
+    auto pair = page_rank_sorted[i];
+    auto article = pair.first;
+    auto centrality = pair.second;
+    std::cout << article << " : " << std::setprecision(5) << std::fixed << centrality << std::endl;
+  }
 
   return 0;
 }

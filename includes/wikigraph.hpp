@@ -106,7 +106,9 @@ public:
 
   void displayPageRankProgress(const size_t& iter, const size_t& total) const;
 
-  std::vector<std::pair<std::string, double>> sortCentralityMap(const std::map<std::string, double>& centrality_map) const;
+  std::vector<std::pair<std::string, double>> getSortedCentrality();
+
+  std::vector<std::pair<std::string, double>> getSortedPageRank();
 
   Graph getMap() const { return article_map; }  // for tests
   std::vector<std::string> getPages() const;
