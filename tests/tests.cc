@@ -117,7 +117,7 @@ TEST_CASE("Page centrality two central equal central nodes", "[Brandes]") {
 }
 
 TEST_CASE("Pagerank simple", "prk") {
-  WikiGraph w("datasets/easypagerank.tsv");
+  WikiGraph w("datasets/pagerank/easypagerank.tsv");
   auto ranked = w.rankPages();
   for (const auto& rank : ranked) {
     std::cout << rank.title << "    " << rank.rank << std::endl;

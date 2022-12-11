@@ -102,6 +102,8 @@ public:
   */
   void displayCentralityProgress(const SafeQueue& queue, const std::vector<std::string>& pages) const;
 
+  void displayPageRankProgress(const size_t& iter, const size_t& total) const;
+
   std::vector<std::pair<std::string, double>> sortCentralityMap(const std::map<std::string, double>& centrality_map) const;
 
   Graph getMap() const { return article_map; }  // for tests

@@ -22,10 +22,13 @@ using Eigen::VectorXd;
 WikiGraph::WikiGraph(const std::string& file_name) {
   // Reads in file stream.
   // Populates map.
-  std::cout << "-----Generating WikiGraph-----" << std::endl;
+  std::cout << "-----Generating Wikigraph-----" << std::endl;
   // open file
   // get a line; decode the first item, decode the second item, add the second to adjlist of firsts
   std::string file = file_to_string(file_name);
+
+  if (file.empty()) throw std::runtime_error("Wikigraph File Not Found!");
+
   std::vector<std::string> lines;
   SplitString(file, '\n', lines);
   // our dataset has a line of empty space that we can discard
@@ -56,6 +59,7 @@ WikiGraph::WikiGraph(const std::string& file_name) {
       article_map[dest];
     }
   }
+  std::cout << "Done!" << std::endl;
 }
 
 // --------- Algorithms --------------
@@ -120,13 +124,16 @@ double WikiGraph::getBetweenCentrality(const std::string& page) {
 
 // TODO: rankPages()
 std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
+
+  std::cout << "-----Ranking Pages-----" << std::endl;
+  
   std::vector<RankedPage> ranked_pages;
 
   MatrixXd outlinks(article_map.size(), article_map.size());
   VectorXd toMultiply(article_map.size());
   auto pages = getPages();
 
-  std::map<std::string, int> place_map;
+  std::unordered_map<std::string, int> place_map;
   for (size_t i = 0; i < pages.size(); i++) {
     place_map.insert({pages[i], i});
   }
@@ -142,6 +149,7 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
     }
   }
 
+  // initialize outgoing links in adj matrix
   for (const auto& page : article_map) {
     if (page.second.size() != 0) {
       double col_rank = 1.0 / page.second.size();
@@ -153,6 +161,7 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
     }
   }
 
+  // dampening matrix
   MatrixXd r_matrix(article_map.size(), article_map.size());
 
   for (size_t i = 0; i < article_map.size(); i++) {
@@ -163,12 +172,18 @@ std::vector<WikiGraph::RankedPage> WikiGraph::rankPages() const {
 
   r_matrix = r_matrix / article_map.size();
 
+  // dampen the matrix
   outlinks = (.85 * outlinks) + (.15 * r_matrix);
 
-  for (int i = 0; i < 200; i++) {
+
+  const size_t ITER = 200;
+  // Multiply it a bunch!
+  for (size_t i = 0; i < ITER; i++) {
+    displayPageRankProgress(i, ITER);
     toMultiply = outlinks * toMultiply;
   }
 
+  // 
   for (size_t i = 0; i < article_map.size(); i++) {
     std::string page = pages[i];
     RankedPage rank = {page, toMultiply(i)};
@@ -309,6 +324,14 @@ void WikiGraph::displayCentralityProgress(const SafeQueue& queue, const std::vec
   float pages_complete = total_pages - pages_to_go;
   float progress = pages_complete  / total_pages;
   std::cout << "[ Progess: " << pages_complete << "/" << total_pages << " ";
+  std::cout << int(progress * 100.0) << "% ] \r";
+  std::cout.flush();
+  if (progress == 1.0) std::cout << std::endl;
+}
+
+void WikiGraph::displayPageRankProgress(const size_t& iter, const size_t& total) const {
+  double progress = (double)iter / (double) total;
+  std::cout << "[ Progess: " ;
   std::cout << int(progress * 100.0) << "% ] \r";
   std::cout.flush();
   if (progress == 1.0) std::cout << std::endl;
