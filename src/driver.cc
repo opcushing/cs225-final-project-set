@@ -7,9 +7,6 @@
 #include "wikigraph.hpp"
 
 int main(int argc, char* argv[]) {
-  // TODO: Setup I/O
-
-  (void)argv;
 
   std::stringstream usage;
   usage << "Usage: \n";
@@ -47,19 +44,32 @@ int main(int argc, char* argv[]) {
   }
 
   WikiGraph w{"./datasets/links.tsv"};
-  
-  
 
-  auto ranked_pages = w.rankPages();
-
-  auto page_rank_sorted = w.getSortedPageRank();
-
-  std::cout << "The ten highest ranked articles are: " << std::endl;
-  for (size_t i = 0; i < 10; ++i) {
-    auto pair = page_rank_sorted[i];
-    auto article = pair.first;
-    auto centrality = pair.second;
-    std::cout << article << " : " << std::setprecision(5) << std::fixed << centrality << std::endl;
+  if (command == "bfs") {
+    auto path = w.getPathBFS(args.first, args.second);
+    for (auto page = path.begin(); page != path.end() - 1; ++page) {
+      std::cout << *page << " -> ";
+    }
+    std::cout << path.back() << std::endl;
+  } else if (command == "pagerank") {
+    if (args.first == "-t") {
+      auto path = w.rankPages();
+      auto sorted = w.getSortedPageRank();
+      for (size_t i = 0; i < range; ++i) {
+        std::cout << sorted[i].first << " : " << std::setprecision(5) << std::fixed << sorted[i].second << std::endl;
+      }
+    } else {
+      std::cout << w.getPageRank(args.second) << std::endl;
+    }
+  } else if (command == "brandes") {
+    if (args.first == "-t") {
+      auto path = w.getSortedCentrality();
+      for (size_t i = 0; i < range; ++i) {
+        std::cout << path[i].first << " : " << std::setprecision(5) << std::fixed << path[i].second << std::endl;
+      }
+    } else {
+      std::cout << w.getBetweenCentrality(args.second) << std::endl;
+    }
   }
 
   return 0;
