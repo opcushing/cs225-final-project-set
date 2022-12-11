@@ -4,14 +4,11 @@
 #include <stack>
 #include <limits>
 #include <algorithm>
-<<<<<<< HEAD
 #include <stack>
-=======
 #include <thread>
 #include <mutex>
 #include <iostream>
 #include "Eigen/Dense"
->>>>>>> main
 
 #include "utilities.hpp"
 
