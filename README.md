@@ -8,7 +8,11 @@
 # Running instructions
 1. Compile the progam using `make`.
 2. Run `./wikigraph` with arguments:
-  - (we need a proper driver)
+  - `bfs "A" "B"` for the shortest path from A to B
+  - `pagerank -t n` for the top `n` ranked pages
+  - `pagerank -p "page"` for the ranking of `page`
+  - `brandes -t n` for the top `n` most central pages
+  - `brandes -p "page"` for the centrality of `page`
 3. You can run tests by compiling (`make tests`) and running `./bin/tests`. We test the following functionalities:
   - The constructor can read from a TSV file properly
   - The BFS can work on a simple example graph
