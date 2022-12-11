@@ -10,6 +10,9 @@ bin/exec: ./src/driver.cc ./src/utilities.cc ./src/wikigraph.cc
 bin/tests: ./tests/tests.cc ./src/utilities.cc ./src/wikigraph.cc
 	$(CXX) $(CXX_FLAGS) $^ -o $@
 
+production: ./src/driver.cc ./src/utilities.cc ./src/wikigraph.cc
+	$(CXX) $(CXX_FLAGS) $^ -o ./wikigraph
+
 .DEFAULT_GOAL := exec
 .PHONY: exec tests clean
 
