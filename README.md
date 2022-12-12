@@ -2,7 +2,7 @@
 - The majority of our code can be found in `src/wikigraph.cc`.
 - The primary dataset can be found in `datasets/links.tsv`.
 - Tests can be found in the `tests` directory.
-- The final project presentation can be found [here](https://example.com)
+- The final project presentation can be found [here](https://mediaspace.illinois.edu/media/t/1_1oquv61x)
 - The results writeup can be found in `results.md`.
 
 # Running instructions
